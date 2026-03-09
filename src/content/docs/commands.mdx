@@ -41,6 +41,32 @@ On startup, the server:
 
 ---
 
+### `agentsview sync`
+
+Run the sync engine to populate the database, then exit without
+starting the HTTP server. Useful for scripting, CI, or refreshing
+data after config changes.
+
+```bash
+agentsview sync [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-full` | `false` | Force a full resync regardless of data version |
+
+**Examples:**
+
+```bash
+agentsview sync          # incremental sync and exit
+agentsview sync -full    # full resync and exit
+```
+
+After syncing, a summary of session and message counts is printed
+to stdout.
+
+---
+
 ### `agentsview prune`
 
 Delete sessions matching one or more filters. At least one filter
@@ -116,6 +142,7 @@ agentsview help
 | `AMP_DIR` | `~/.local/share/amp/threads` | Amp threads directory |
 | `VSCODE_COPILOT_DIR` | (platform-specific) | VS Code Copilot sessions directory |
 | `OPENCLAW_DIR` | `~/.openclaw/agents` | OpenClaw agents directory |
+| `PI_DIR` | `~/.pi/agent/sessions` | Pi sessions directory |
 | `AGENT_VIEWER_DATA_DIR` | `~/.agentsview` | Data directory (database, config) |
 
 Environment variables override the built-in defaults. Set them

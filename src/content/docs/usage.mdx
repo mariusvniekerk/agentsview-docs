@@ -179,7 +179,8 @@ Each session item shows:
 - **Session name** — first message text, truncated to 50
   characters
 - **Star button** — click the star icon or press `s` to star
-  a session. Starred sessions persist in browser localStorage.
+  a session. Starred sessions persist in the SQLite database
+  so they survive server restarts.
 - **Project name** — abbreviated, right-aligned
 - **Relative time** — "2h ago", "Mon", "Dec 1"
 - **User prompt count** — number of user messages in the session
@@ -216,10 +217,12 @@ dropdown with three filter categories that can be combined:
 - **Recently Active** — toggle to show only sessions updated
   within the last 24 hours
 - **Agent** — select a single agent (Claude, Copilot, Codex,
-  Cursor, Gemini, OpenCode, Amp, VS Code Copilot, OpenClaw)
+  Cursor, Gemini, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi)
   to isolate its sessions. Click again to deselect.
 - **Min Prompts** — filter to sessions with at least 2, 3, 5,
   or 10 user messages
+- **Include single-turn** — toggle to include sessions with one
+  or fewer user messages (excluded by default to reduce noise)
 - **Hide unknown** — toggle to hide sessions whose project
   could not be determined
 
@@ -410,6 +413,42 @@ the matching message.
 - `↑` / `↓` — navigate results
 - `Enter` — select current result
 - `Esc` — close palette
+
+---
+
+## Session Management
+
+### Renaming Sessions
+
+Double-click a session name in the sidebar to rename it inline.
+You can also right-click a session to open a context menu and
+select **Rename**. Press Enter to save or Escape to cancel. The
+custom name persists as a `display_name` in the database and
+overrides the default first-message title.
+
+### Trash
+
+Right-click a session in the sidebar and select **Delete** to
+move it to the trash. An undo toast appears briefly to let you
+recover the session immediately. Trashed sessions are hidden
+from all listings and analytics.
+
+Click **Trash** in the header navigation to view trashed
+sessions. From the trash page you can restore individual
+sessions or permanently delete them. Use **Empty trash** to
+permanently delete all trashed sessions at once.
+
+### Pinned Messages
+
+Click the pin icon on any message header to pin it. Pinned
+messages are saved to the database and accessible from the
+**Pinned** page in the header navigation.
+
+The pinned page shows a gallery-style grid of pinned messages.
+Each card shows the message content (expandable for long
+messages), the session and project it belongs to, and actions
+to copy the content, unpin, or navigate back to the source
+message in its session.
 
 ---
 

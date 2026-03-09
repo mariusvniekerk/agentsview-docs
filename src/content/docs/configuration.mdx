@@ -40,7 +40,7 @@ API endpoint `POST /api/v1/config/github`.
 
 ## Session Discovery
 
-agentsview auto-discovers session files from nine agent types:
+agentsview auto-discovers session files from ten agent types:
 
 | Agent | Default Directory | File Format |
 |-------|-------------------|-------------|
@@ -53,6 +53,7 @@ agentsview auto-discovers session files from nine agent types:
 | Amp | `~/.local/share/amp/threads/` | JSON per thread |
 | VS Code Copilot | (platform-specific, see below) | JSON / JSONL per session |
 | OpenClaw | `~/.openclaw/agents/` | JSONL per session |
+| Pi | `~/.pi/agent/sessions/` | JSONL per session |
 
 **VS Code Copilot default directories** vary by platform:
 
@@ -76,6 +77,7 @@ export OPENCODE_DIR=~/custom/opencode
 export AMP_DIR=~/custom/amp
 export VSCODE_COPILOT_DIR=~/custom/vscode
 export OPENCLAW_DIR=~/custom/openclaw
+export PI_DIR=~/custom/pi
 ```
 
 ### Multiple Directories
@@ -120,6 +122,8 @@ includes FTS5 full-text search indexes on message content.
 | `messages` | Message content with role, ordinal, timestamps |
 | `tool_calls` | Tool invocations with normalized category taxonomy |
 | `insights` | AI-generated session analysis and summaries |
+| `starred_sessions` | Server-side star persistence (replaces localStorage) |
+| `pinned_messages` | Pinned message references with session linkage |
 | `stats` | Aggregate counts (session_count, message_count) |
 | `skipped_files` | Cache of non-interactive session files |
 | `messages_fts` | FTS5 virtual table for full-text search |
