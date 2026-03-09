@@ -3,6 +3,29 @@ title: Changelog
 description: Release history for agentsview
 ---
 
+## 0.11.0
+<small>2026-03-08</small>
+
+**New features**
+
+- Add Pi agent support for importing and viewing Pi conversations, including JSONL session parsing, thinking blocks, and tool calls.
+- Add an `agentsview sync` command to populate the database without starting the HTTP server. Supports a `-full` flag to force a complete resync.
+- Add session renaming (double-click or right-click context menu), soft delete with trash and undo, and pinned messages with a gallery view.
+- Persist starred sessions in SQLite so stars survive server restarts. Existing localStorage stars are automatically migrated on first load.
+
+**Improvements**
+
+- Exclude single-turn sessions (one or fewer user messages) by default in session lists and analytics views to reduce noise. A new "Include single-turn" toggle in the sidebar filter dropdown opts back in.
+- Normalize tool metadata across agents so tool calls from Gemini, Pi, and other agents display with the same metadata tags as their Claude equivalents.
+
+**Bug fixes**
+
+- Align timestamps between message headers and grouped tool call headers so they sit at the same right edge in all layouts.
+- Show Copilot `reasoningText` as thinking blocks instead of discarding it.
+- Extract Gemini tool results more reliably and recognize additional Gemini tool names (`replace`, `run_shell_command`, `grep_search`, `glob`, `list_directory`).
+
+---
+
 ## 0.10.0
 <small>2026-03-04</small>
 
