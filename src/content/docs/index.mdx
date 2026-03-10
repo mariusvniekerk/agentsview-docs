@@ -1,8 +1,8 @@
 ---
 title: agentsview
-description: Local web viewer and analytics for AI agent sessions
+description: Local-first desktop and web app for AI agent sessions
 hero:
-  tagline: A local web app for browsing, searching, and analyzing your past AI coding sessions. See what your agents actually did across every project.
+  tagline: A local-first desktop and web app for browsing, searching, and analyzing your past AI coding sessions. See what your agents actually did across every project.
   image:
     html: '<img src="/screenshots/dashboard.png" alt="agentsview analytics dashboard" />'
   actions:
@@ -28,9 +28,19 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   <img src="/agents/vscode-copilot.svg" alt="VS Code Copilot" data-agent="vscode-copilot" width="600" height="120" />
   <img src="/agents/openclaw.svg" alt="OpenClaw" data-agent="openclaw" width="500" height="120" />
   <img src="/agents/pi.svg" alt="Pi" data-agent="pi" width="400" height="120" />
+  <img src="/agents/iflow.svg" alt="iFlow" data-agent="iflow" width="400" height="120" />
 </div>
 
 ## Quick Start
+
+**Download the desktop app (recommended):**
+
+Download the latest `.dmg` (macOS) or `.exe` (Windows) from
+[GitHub Releases](https://github.com/wesm/agentsview/releases).
+The desktop app is fully bundled — no CLI needed — and includes
+built-in auto-update support.
+
+**Install via CLI:**
 
 ```bash
 curl -fsSL https://agentsview.io/install.sh | bash
@@ -42,23 +52,25 @@ curl -fsSL https://agentsview.io/install.sh | bash
 powershell -ExecutionPolicy ByPass -c "irm https://agentsview.io/install.ps1 | iex"
 ```
 
-The installer detects your OS and architecture, downloads the latest
-release from GitHub Releases, verifies the SHA-256 checksum, and
-installs the binary.
-
 ```bash
 agentsview              # Start server, open browser
 agentsview -port 9090   # Custom port
 agentsview -no-browser  # Start without opening browser
 ```
 
+:::note
+The desktop app and CLI share the same data directory
+(`~/.agentsview/`), so you can use one or both — they are
+fully complementary.
+:::
+
 ## What It Does
 
 agentsview reads the session files that Claude Code, Codex,
 Copilot CLI, Cursor, Gemini CLI, OpenCode, Amp, VS Code Copilot,
-OpenClaw, and Pi leave on your machine and gives you a web
-interface to work with them. It runs locally — nothing leaves
-your machine.
+OpenClaw, Pi, and iFlow leave on your machine and gives you a
+local-first desktop and web app to work with them. It runs
+locally — nothing leaves your machine.
 
 <CardGrid stagger>
   <Card title="AI-Powered Insights" icon="star">
@@ -92,13 +104,13 @@ your machine.
   <Card title="Multi-Agent Support" icon="rocket">
     Works with Claude Code, Codex, Copilot CLI, Cursor,
     Gemini CLI, OpenCode, Amp, VS Code Copilot,
-    OpenClaw, and Pi. Auto-discovers session directories
-    so there's nothing to configure.
+    OpenClaw, Pi, and iFlow. Auto-discovers session
+    directories so there's nothing to configure.
   </Card>
   <Card title="Runs Locally" icon="laptop">
     SQLite database, embedded web frontend, no cloud
-    services, no accounts. Install a single binary and
-    run it.
+    services, no accounts. Install the desktop app or
+    a single binary and run it.
   </Card>
 </CardGrid>
 

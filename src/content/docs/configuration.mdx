@@ -40,7 +40,7 @@ API endpoint `POST /api/v1/config/github`.
 
 ## Session Discovery
 
-agentsview auto-discovers session files from ten agent types:
+agentsview auto-discovers session files from eleven agent types:
 
 | Agent | Default Directory | File Format |
 |-------|-------------------|-------------|
@@ -54,6 +54,7 @@ agentsview auto-discovers session files from ten agent types:
 | VS Code Copilot | (platform-specific, see below) | JSON / JSONL per session |
 | OpenClaw | `~/.openclaw/agents/` | JSONL per session |
 | Pi | `~/.pi/agent/sessions/` | JSONL per session |
+| iFlow | `~/.iflow/projects/` | JSONL per session |
 
 **VS Code Copilot default directories** vary by platform:
 
@@ -78,6 +79,7 @@ export AMP_DIR=~/custom/amp
 export VSCODE_COPILOT_DIR=~/custom/vscode
 export OPENCLAW_DIR=~/custom/openclaw
 export PI_DIR=~/custom/pi
+export IFLOW_DIR=~/custom/iflow
 ```
 
 ### Multiple Directories
@@ -101,7 +103,8 @@ running Windows and WSL side by side — add array fields to
 The corresponding fields are `claude_project_dirs`,
 `codex_sessions_dirs`, `copilot_dirs`,
 `cursor_project_dirs`, `gemini_dirs`, `opencode_dirs`,
-`amp_dirs`, `vscode_copilot_dirs`, and `openclaw_dirs`.
+`amp_dirs`, `vscode_copilot_dirs`, `openclaw_dirs`,
+and `iflow_dirs`.
 Each accepts an array of paths. When set, these take precedence
 over the single-directory environment variable and the default
 path.

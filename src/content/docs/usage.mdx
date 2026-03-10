@@ -216,9 +216,10 @@ dropdown with three filter categories that can be combined:
 - **Starred** — toggle to show only starred sessions
 - **Recently Active** — toggle to show only sessions updated
   within the last 24 hours
-- **Agent** — select a single agent (Claude, Copilot, Codex,
-  Cursor, Gemini, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi)
-  to isolate its sessions. Click again to deselect.
+- **Agent** — select one or more agents (Claude, Copilot, Codex,
+  Cursor, Gemini, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi,
+  iFlow) to filter sessions. Click an agent to toggle its
+  selection; multiple agents can be active at once.
 - **Min Prompts** — filter to sessions with at least 2, 3, 5,
   or 10 user messages
 - **Include single-turn** — toggle to include sessions with one
@@ -449,6 +450,20 @@ Each card shows the message content (expandable for long
 messages), the session and project it belongs to, and actions
 to copy the content, unpin, or navigate back to the source
 message in its session.
+
+### Session Resume Menu
+
+Right-click a session in the sidebar to open a context menu
+with three resume actions:
+
+- **Reopen** — reopen the session in the agent that created it
+- **Terminal** — launch a terminal in the session's working
+  directory
+- **Open Directory** — open the session's working directory in
+  Finder (macOS) or Explorer (Windows)
+
+These actions let you quickly pick up where you left off
+without manually navigating to the project directory.
 
 ---
 
