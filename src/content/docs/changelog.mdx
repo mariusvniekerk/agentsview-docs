@@ -3,6 +3,26 @@ title: Changelog
 description: Release history for agentsview
 ---
 
+## 0.12.0
+<small>2026-03-10</small>
+
+**New features**
+
+- Add iFlow agent support for importing and viewing iFlow conversations, including JSONL session parsing and tool calls.
+- Add a session resume menu with three actions: reopen a session, launch a terminal in its working directory, and open the directory in Finder/Explorer.
+- Ship packaged desktop releases (`.dmg` for macOS, `.exe` for Windows) as the recommended install path, with built-in auto-update support.
+
+**Improvements**
+
+- Replace the single-select agent filter with a multi-select agent filter, allowing multiple agents to be selected at once.
+- Improve cross-platform path handling for more reliable session discovery on Windows and WSL.
+
+**Bug fixes**
+
+- Fix Amp tool output rendering so tool results display correctly in expanded tool blocks.
+
+---
+
 ## 0.11.0
 <small>2026-03-08</small>
 

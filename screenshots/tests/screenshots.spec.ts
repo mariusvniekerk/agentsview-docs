@@ -125,17 +125,20 @@ test.describe('Dashboard', () => {
   });
 
   test('activity timeline', async ({ page }) => {
-    // ActivityTimeline is the 3rd chart-panel (index 2)
-    const panel = page.locator('.chart-panel').nth(2);
-    if (await panel.count() > 0) {
-      const timeline = panel.locator('.timeline-container');
-      if (await timeline.count() > 0) {
-        await page.waitForSelector('.timeline-svg', {
-          timeout: 10_000,
-        });
-        await page.waitForTimeout(500);
+    const timeline = page.locator('.timeline-container');
+    if (await timeline.count() > 0) {
+      await timeline.scrollIntoViewIfNeeded();
+      await page.waitForSelector('.timeline-svg', {
+        timeout: 10_000,
+      });
+      await page.waitForTimeout(500);
+      // Capture the parent chart-panel that wraps the timeline
+      const panel = page.locator(
+        '.chart-panel:has(.timeline-container)'
+      );
+      if (await panel.count() > 0) {
+        await snapEl(panel, 'activity-timeline');
       }
-      await snapEl(panel, 'activity-timeline');
     }
   });
 
@@ -251,7 +254,7 @@ test.describe('Dashboard', () => {
     const count = await panels.count();
     for (let i = 0; i < count; i++) {
       const text = await panels.nth(i).textContent();
-      if (text && text.includes('Agent')) {
+      if (text && text.includes('Comparison')) {
         await panels.nth(i).scrollIntoViewIfNeeded();
         await page.waitForTimeout(300);
         await snapEl(panels.nth(i), 'agent-comparison');
