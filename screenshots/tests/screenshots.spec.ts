@@ -125,24 +125,19 @@ test.describe('Dashboard', () => {
   });
 
   test('activity timeline', async ({ page }) => {
-    const panels = page.locator('.chart-panel');
-    const count = await panels.count();
-    for (let i = 0; i < count; i++) {
-      const text = await panels.nth(i).textContent();
-      if (text && text.includes('Timeline')) {
-        await panels.nth(i).scrollIntoViewIfNeeded();
-        await page.waitForTimeout(300);
-        const timeline = panels.nth(i).locator(
-          '.timeline-container'
-        );
-        if (await timeline.count() > 0) {
-          await page.waitForSelector('.timeline-svg', {
-            timeout: 10_000,
-          });
-          await page.waitForTimeout(500);
-        }
-        await snapEl(panels.nth(i), 'activity-timeline');
-        break;
+    const timeline = page.locator('.timeline-container');
+    if (await timeline.count() > 0) {
+      await timeline.scrollIntoViewIfNeeded();
+      await page.waitForSelector('.timeline-svg', {
+        timeout: 10_000,
+      });
+      await page.waitForTimeout(500);
+      // Capture the parent chart-panel that wraps the timeline
+      const panel = page.locator(
+        '.chart-panel:has(.timeline-container)'
+      );
+      if (await panel.count() > 0) {
+        await snapEl(panel, 'activity-timeline');
       }
     }
   });
