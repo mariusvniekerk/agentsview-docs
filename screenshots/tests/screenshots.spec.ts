@@ -125,17 +125,25 @@ test.describe('Dashboard', () => {
   });
 
   test('activity timeline', async ({ page }) => {
-    // ActivityTimeline is the 3rd chart-panel (index 2)
-    const panel = page.locator('.chart-panel').nth(2);
-    if (await panel.count() > 0) {
-      const timeline = panel.locator('.timeline-container');
-      if (await timeline.count() > 0) {
-        await page.waitForSelector('.timeline-svg', {
-          timeout: 10_000,
-        });
-        await page.waitForTimeout(500);
+    const panels = page.locator('.chart-panel');
+    const count = await panels.count();
+    for (let i = 0; i < count; i++) {
+      const text = await panels.nth(i).textContent();
+      if (text && text.includes('Timeline')) {
+        await panels.nth(i).scrollIntoViewIfNeeded();
+        await page.waitForTimeout(300);
+        const timeline = panels.nth(i).locator(
+          '.timeline-container'
+        );
+        if (await timeline.count() > 0) {
+          await page.waitForSelector('.timeline-svg', {
+            timeout: 10_000,
+          });
+          await page.waitForTimeout(500);
+        }
+        await snapEl(panels.nth(i), 'activity-timeline');
+        break;
       }
-      await snapEl(panel, 'activity-timeline');
     }
   });
 
@@ -251,7 +259,7 @@ test.describe('Dashboard', () => {
     const count = await panels.count();
     for (let i = 0; i < count; i++) {
       const text = await panels.nth(i).textContent();
-      if (text && text.includes('Agent')) {
+      if (text && text.includes('Comparison')) {
         await panels.nth(i).scrollIntoViewIfNeeded();
         await page.waitForTimeout(300);
         await snapEl(panels.nth(i), 'agent-comparison');
