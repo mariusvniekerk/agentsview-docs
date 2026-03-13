@@ -3,6 +3,31 @@ title: Changelog
 description: Release history for agentsview
 ---
 
+## 0.13.0
+<small>2026-03-12</small>
+
+**New features**
+
+- Add a Settings page for appearance, terminal, GitHub, agent directory, and remote access options — centralizing configuration that was previously spread across individual modals and config file edits.
+- Add remote access with bearer token authentication, trusted public origins, and managed Caddy reverse proxy mode for secure multi-device access.
+- Organize sub-agents and teams in a collapsible tree view in the sidebar, making complex multi-agent sessions easier to navigate.
+- Update live sessions incrementally as new activity arrives, replacing full refreshes for faster real-time updates.
+- Add desktop zoom controls for adjusting the interface scale.
+
+**Improvements**
+
+- Skip common dependency and build folders (e.g. `node_modules`, `__pycache__`, `.git`) during recursive watching to reduce noise and overhead.
+- Show release information in a new About dialog accessible from the header.
+- Shut down cleanly on `Ctrl+C` and stop auto-opening the browser on startup by default.
+
+**Bug fixes**
+
+- Preserve original project name casing in group headers.
+- Resolve project names correctly for deleted nested worktrees.
+- Fix navigation issues in the Windows desktop app.
+
+---
+
 ## 0.12.0
 <small>2026-03-10</small>
 

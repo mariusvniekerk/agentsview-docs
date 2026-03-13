@@ -44,6 +44,7 @@ export default defineConfig({
         { label: 'Session Insights', slug: 'insights' },
         { label: 'CLI Reference', slug: 'commands' },
         { label: 'Configuration', slug: 'configuration' },
+        { label: 'Remote Access', slug: 'remote-access' },
         { label: 'Changelog', slug: 'changelog' },
       ],
     }),

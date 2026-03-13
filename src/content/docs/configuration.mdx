@@ -33,10 +33,17 @@ on first run. It stores persistent settings that survive restarts.
 | `cursor_secret` | Auto-generated HMAC key for pagination cursor signing |
 | `github_token` | GitHub personal access token for Gist publishing |
 | `result_content_blocked_categories` | Tool categories whose result content is not stored (default: `["Read", "Glob"]`) |
+| `remote_access` | Enable remote connections — auto-binds to `0.0.0.0` and requires bearer token auth |
+| `auth_token` | Auto-generated 256-bit bearer token for remote access |
+| `public_url` | Public URL for hostname/proxy access and origin validation |
+| `public_origins` | Array of additional trusted CORS origins |
+| `proxy` | Managed proxy configuration object — see [Remote Access](/remote-access/) |
 
 The `cursor_secret` is generated automatically on first run.
-The `github_token` can be set via the web UI settings or the
-API endpoint `POST /api/v1/config/github`.
+The `github_token` can be set via the web UI Settings page or
+the API endpoint `POST /api/v1/config/github`. Remote access
+fields can be configured via the Settings page or CLI flags —
+see [Remote Access](/remote-access/) for details.
 
 ## Session Discovery
 
@@ -140,7 +147,10 @@ agentsview keeps the database in sync with session files through
 two mechanisms:
 
 1. **File watcher** — uses fsnotify to detect file changes
-   in real time (500ms debounce)
+   in real time (500ms debounce). Common dependency and build
+   folders (`node_modules`, `__pycache__`, `.git`, `vendor`,
+   `dist`, etc.) are automatically skipped to reduce noise
+   and overhead.
 2. **Periodic sync** — full directory scan every 15 minutes
    as a safety net
 
