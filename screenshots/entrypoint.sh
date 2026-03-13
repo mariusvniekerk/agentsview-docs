@@ -14,7 +14,7 @@ AGENT_VIEWER_DATA_DIR="$DATA_DIR" \
 CLAUDE_PROJECTS_DIR="$EMPTY_DIR" \
 CODEX_SESSIONS_DIR="$EMPTY_DIR" \
 GEMINI_DIR="$EMPTY_DIR" \
-agentsview -port "$PORT" -no-browser &
+agentsview -port "$PORT" &
 SERVER_PID=$!
 
 # Wait for server to be ready
@@ -31,10 +31,6 @@ for i in $(seq 1 30); do
   fi
   sleep 1
 done
-
-# Prune one-shot sessions to reduce noise in screenshots
-echo "Pruning one-shot sessions..."
-AGENT_VIEWER_DATA_DIR="$DATA_DIR" agentsview prune -max-messages 1 -yes
 
 echo ""
 echo "Capturing screenshots..."

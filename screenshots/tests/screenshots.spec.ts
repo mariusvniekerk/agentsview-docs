@@ -713,3 +713,96 @@ test.describe('Themes', () => {
     await snap(page, 'theme-light');
   });
 });
+
+// ── Settings page ────────────────────────────────────────
+
+test.describe('Settings', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  async function openSettings(page: Page) {
+    const settingsBtn = page.locator(
+      'button[title*="Settings"], button[title*="settings"], ' +
+      'a[href*="settings"], .nav-btn:has-text("Settings")'
+    );
+    await expect(settingsBtn.first()).toBeVisible({
+      timeout: 5_000,
+    });
+    await settingsBtn.first().click();
+    const settingsPage = page.locator(
+      '.settings-page, .settings-container'
+    );
+    await expect(settingsPage).toBeVisible({ timeout: 5_000 });
+    await page.waitForTimeout(500);
+  }
+
+  test('settings page', async ({ page }) => {
+    await openSettings(page);
+    await snap(page, 'settings');
+  });
+
+  test('settings remote access section', async ({ page }) => {
+    await openSettings(page);
+
+    // Find the settings-section that contains "Remote Access"
+    const remoteSection = page.locator(
+      '.settings-section:has(.section-title:text("Remote Access"))'
+    );
+    await expect(remoteSection).toBeVisible({ timeout: 5_000 });
+    await remoteSection.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
+    await snapEl(remoteSection, 'settings-remote');
+  });
+});
+
+// ── About dialog ─────────────────────────────────────────
+
+test.describe('About', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('about dialog', async ({ page }) => {
+    const versionEl = page.locator('button.version');
+    await expect(versionEl.first()).toBeVisible({
+      timeout: 5_000,
+    });
+    await versionEl.first().click();
+
+    const dialog = page.locator(
+      '.about-dialog, .about-modal, .about-overlay'
+    );
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    await snap(page, 'about-dialog');
+    await page.keyboard.press('Escape');
+  });
+});
+
+// ── Sub-agent tree ───────────────────────────────────────
+
+test.describe('Sub-agent tree', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('collapsible sub-agent tree', async ({ page }) => {
+    const treeToggle = page.locator(
+      '.subagent-toggle, .tree-toggle, ' +
+      '.session-item .disclosure-triangle'
+    );
+    await expect(treeToggle.first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await treeToggle.first().click();
+    await page.waitForTimeout(500);
+
+    const sidebar = page.locator('.sidebar');
+    await snapEl(sidebar, 'subagent-tree');
+  });
+});

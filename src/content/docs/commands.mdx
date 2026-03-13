@@ -18,17 +18,28 @@ agentsview serve [flags]
 |------|---------|-------------|
 | `-host` | `127.0.0.1` | Host to bind to |
 | `-port` | `8080` | Port to listen on |
-| `-no-browser` | `false` | Don't open browser on startup |
+| `-browser` | `false` | Open browser on startup |
+| `-public-url` | | Public URL for hostname or proxy access |
+| `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
+| `-proxy` | | Managed proxy mode (`caddy`) |
+| `-caddy-bin` | `caddy` | Caddy binary path |
+| `-proxy-bind-host` | `127.0.0.1` | Interface for managed proxy |
+| `-public-port` | `8443` | External port for managed proxy |
+| `-tls-cert` | | TLS certificate path |
+| `-tls-key` | | TLS key path |
+| `-allowed-subnet` | | Client CIDR allowlist (repeatable/comma-separated) |
 
 The server auto-discovers an available port if `8080` is busy.
+See [Remote Access](/remote-access/) for details on the remote
+access and proxy flags.
 
 **Examples:**
 
 ```bash
 agentsview                          # defaults
 agentsview -port 9090               # custom port
-agentsview -host 0.0.0.0            # bind to all interfaces
-agentsview -host 0.0.0.0 -no-browser  # headless mode
+agentsview -browser                 # open browser on startup
+agentsview -public-url https://agents.example.com  # remote access
 ```
 
 On startup, the server:
@@ -38,6 +49,9 @@ On startup, the server:
 3. Starts the file watcher (500ms debounce)
 4. Starts periodic sync (every 15 minutes)
 5. Serves the Svelte SPA and REST API
+
+The server shuts down cleanly on `Ctrl+C`, flushing the
+database and stopping file watchers.
 
 ---
 

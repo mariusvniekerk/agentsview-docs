@@ -193,6 +193,16 @@ Each agent group shows a color-coded dot, agent name, and
 session count. Click an agent header to expand or collapse
 its section. Groups start collapsed when first enabled.
 
+### Sub-Agent Tree
+
+When a session spawns sub-agents or teams, the sidebar
+organizes them in a collapsible tree view. Parent sessions
+show a disclosure triangle; click to expand and see child
+agents nested underneath. This makes complex multi-agent
+workflows easier to navigate without leaving the session list.
+
+![Sub-agent tree view](/screenshots/subagent-tree.png)
+
 ### Forks and Subagent Sessions
 
 agentsview automatically detects conversation forks in Claude
@@ -201,9 +211,10 @@ branch a conversation. Large forks (more than 3 user turns)
 appear as separate session entries grouped with their parent.
 Small retries fold into the main session.
 
-Subagent sessions spawned by the Task tool are hidden from the
-top-level session list and are accessible only through their
-parent session's tool blocks (see
+Subagent sessions spawned by the Task tool are organized
+under their parent in the sidebar's
+[sub-agent tree](#sub-agent-tree) and are also viewable
+inline through the parent session's tool blocks (see
 [Subagent Linking](#subagent-linking) below).
 
 ### Session Filters
@@ -376,7 +387,9 @@ scroll up. Smaller sessions load all messages at once.
 
 When viewing an active session, agentsview uses Server-Sent
 Events to stream new messages in real time. The message list
-updates automatically as the agent works.
+updates incrementally — only new activity is fetched, rather
+than reloading the entire session — so updates arrive faster
+and with less overhead.
 
 ---
 
@@ -534,11 +547,54 @@ always works.
 
 ---
 
+## Settings
+
+Click the gear icon in the header to open the Settings page.
+Settings are organized into tabs:
+
+![Settings page](/screenshots/settings.png)
+
+| Section | What You Can Configure |
+|---------|----------------------|
+| Appearance | Theme (light/dark), block visibility, desktop zoom level |
+| Terminal | Default terminal emulator for session resume |
+| GitHub | Personal access token for Gist publishing |
+| Agent Directories | Custom paths for each agent's session files |
+| Remote Access | Remote connections toggle, auth token, connect to remote server |
+
+![Settings remote access section](/screenshots/settings-remote.png)
+
+Changes are persisted to `~/.agentsview/config.json` and
+survive restarts. See [Remote Access](/remote-access/) for
+details on the remote access settings.
+
+---
+
+## About Dialog
+
+Click the version number in the status bar or select **About**
+from the header menu to open the About dialog. It shows the
+current version, build date, git commit, and links to the
+changelog and GitHub repository.
+
+![About dialog](/screenshots/about-dialog.png)
+
+---
+
+## Desktop Zoom
+
+In the desktop app, use `Cmd+Plus` and `Cmd+Minus` (or
+`Ctrl+Plus` / `Ctrl+Minus` on Windows) to zoom in and out.
+`Cmd+0` resets to the default zoom level. The zoom level can
+also be set in the Settings page under the **Appearance** tab.
+
+---
+
 ## Theme
 
-Click the theme toggle in the header to switch between light
-and dark mode. The preference is saved to localStorage and
-persists across sessions.
+Click the theme toggle in the header or go to Settings >
+Appearance to switch between light and dark mode. The
+preference is saved and persists across sessions.
 
 ![Light theme](/screenshots/theme-light.png)
 

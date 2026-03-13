@@ -71,7 +71,9 @@ This will:
 2. Discover and sync sessions from Claude Code, Codex, Copilot CLI, Cursor, Gemini CLI, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi, and iFlow
 3. Start watching session directories for changes
 4. Launch the web UI at `http://127.0.0.1:8080`
-5. Open your browser automatically
+
+Open `http://127.0.0.1:8080` in your browser, or pass
+`-browser` to open it automatically.
 
 ## Customize
 
@@ -80,7 +82,7 @@ Override the default port or host:
 ```bash
 agentsview -port 9090
 agentsview -host 0.0.0.0 -port 3000
-agentsview -no-browser
+agentsview -browser
 ```
 
 Point to custom session directories with environment variables:
