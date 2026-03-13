@@ -32,7 +32,9 @@ INSERT OR REPLACE INTO stats (key, value) VALUES
   ('session_count', (SELECT COUNT(*) FROM sessions)),
   ('message_count', (SELECT COUNT(*) FROM messages));
 
--- Seed insights for screenshot capture
+-- Remove all real insights and replace with safe seed data
+DELETE FROM insights;
+
 INSERT INTO insights (type, date_from, date_to, project, agent, model, content, created_at) VALUES
 ('daily_activity', '2026-02-20', '2026-02-20', 'roborev', 'claude', 'claude-opus-4-1',
 '## Summary
@@ -90,7 +92,46 @@ One session focused entirely on adding test coverage for the new dedup logic. Ad
 1. **Break up long sessions** — the 38-message refactoring session could have been 2–3 focused sessions with clearer scope.
 2. **Use search more** — several sessions spent multiple Read calls navigating to the right file. A Grep or Glob call upfront would save turns.
 3. **Pin test commands** — repeated manual test invocations could be replaced with a single Bash alias or Makefile target.',
-'2026-02-21T10:15:00.000Z');
+'2026-02-21T10:15:00.000Z'),
+
+('daily_activity', '2026-02-19', '2026-02-19', 'agentsview', 'claude', 'claude-opus-4-1',
+'## Summary
+
+4 sessions in agentsview today, totaling 62 messages and 35 tool calls.
+
+### Frontend Improvements
+
+Two sessions focused on the analytics dashboard. Added a stacked activity timeline chart with daily, weekly, and monthly granularity. The chart uses SVG with D3 scales for responsive rendering.
+
+- **Timeline chart** — implemented in `frontend/src/lib/components/analytics/ActivityTimeline.svelte` with agent-colored stacking and tooltip on hover.
+- **Date range picker** — added quick presets (7d, 30d, 90d, 1y, All) alongside custom date inputs.
+
+### Session Export
+
+One session added standalone HTML export for sessions. The exported file includes all messages, tool calls, and thinking blocks with inline CSS so it renders correctly offline.
+
+### Bug Fix
+
+Fixed a race condition where concurrent search and session-load requests could return stale results. Added request cancellation via `AbortController`.',
+'2026-02-19T17:45:00.000Z'),
+
+('daily_activity', '2026-02-18', '2026-02-18', 'roborev', 'claude', 'claude-opus-4-1',
+'## Summary
+
+2 sessions in roborev today, totaling 31 messages and 19 tool calls.
+
+### API Endpoint Refactoring
+
+Refactored the review submission API to accept batch requests. Previously each file was submitted individually, which caused N+1 request patterns on large PRs. The new endpoint accepts an array of file paths and returns all findings in a single response.
+
+- Updated `internal/server/review_handler.go` with batch support
+- Added request validation for max batch size (50 files)
+- Updated the CLI client to use the batch endpoint
+
+### Documentation
+
+One short session updated the API documentation in `docs/api.md` to reflect the new batch endpoint and its request/response schema.',
+'2026-02-18T16:20:00.000Z');
 
 VACUUM;
 SQL
