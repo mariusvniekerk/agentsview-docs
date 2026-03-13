@@ -773,11 +773,9 @@ test.describe('About', () => {
     });
     await versionEl.first().click();
 
-    const dialog = page.locator(
-      '.about-dialog, .about-modal, .about-overlay'
-    );
+    const dialog = page.locator('.about-modal');
     await expect(dialog).toBeVisible({ timeout: 5_000 });
-    await snap(page, 'about-dialog');
+    await snapEl(dialog, 'about-dialog');
     await page.keyboard.press('Escape');
   });
 });
