@@ -826,21 +826,20 @@ test.describe('Token usage', () => {
     await selectRichSession(page);
     await page.waitForTimeout(500);
 
-    // Capture the session info/header area that contains
-    // token usage stats
-    const header = page.locator(
-      '.session-info, .session-header, ' +
-      '.session-detail-header, .detail-header'
+    // Token badge lives in SessionBreadcrumb
+    const badge = page.locator('.token-badge');
+    await expect(badge.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Capture the parent breadcrumb row for context
+    const breadcrumb = page.locator(
+      '.session-breadcrumb, .breadcrumb'
     );
-    if (await header.count() > 0) {
-      await snapEl(header.first(), 'token-usage');
+    if (await breadcrumb.count() > 0) {
+      await snapEl(breadcrumb.first(), 'token-usage');
     } else {
-      // Fall back to clipping the top portion of the page
-      await page.screenshot({
-        path: join(DIR, 'token-usage.png'),
-        type: 'png',
-        clip: { x: 300, y: 0, width: 1140, height: 120 },
-      });
+      await snapEl(badge.first(), 'token-usage');
     }
   });
 });
