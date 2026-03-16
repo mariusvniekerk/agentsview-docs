@@ -3,6 +3,28 @@ title: Changelog
 description: Release history for agentsview
 ---
 
+## 0.14.0
+<small>2026-03-15</small>
+
+**New features**
+
+- Add in-session search with `Cmd+F` / `Ctrl+F` and keyboard navigation between matches for finding text within a session's messages.
+- Display token usage for each session, showing input and output token counts in the session detail header.
+- Add Zencoder CLI session support for importing and viewing Zencoder conversations.
+- Add GitHub Copilot CLI resume support in the session dropdown, letting you reopen Copilot CLI sessions directly.
+- Ship Linux desktop builds as AppImages, adding Linux to the desktop app platform matrix alongside macOS `.dmg` and Windows `.exe`.
+
+**Improvements**
+
+- Improve insight agent detection for sandboxed sessions and GitHub Copilot, producing more accurate and relevant insights.
+- Speed up session resync for larger histories, reducing the time to re-parse all session files.
+
+**Bug fixes**
+
+- Fix updater output so the verify step starts on a new line after download progress.
+
+---
+
 ## 0.13.0
 <small>2026-03-12</small>
 

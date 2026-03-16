@@ -780,6 +780,70 @@ test.describe('About', () => {
   });
 });
 
+// ── In-session search ────────────────────────────────────
+
+test.describe('In-session search', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await selectRichSession(page);
+  });
+
+  test('search bar with matches', async ({ page }) => {
+    // Open in-session search with Cmd+F
+    await page.keyboard.press('Meta+f');
+    await page.waitForSelector(
+      '.session-search, .in-session-search, .find-bar',
+      { timeout: 5_000 }
+    );
+    await page.waitForTimeout(300);
+
+    // Type a common word to get matches
+    const input = page.locator(
+      '.session-search input, ' +
+      '.in-session-search input, ' +
+      '.find-bar input'
+    );
+    await input.fill('the');
+    await page.waitForTimeout(1000);
+
+    await snap(page, 'in-session-search');
+
+    // Close search
+    await page.keyboard.press('Escape');
+  });
+});
+
+// ── Token usage ──────────────────────────────────────────
+
+test.describe('Token usage', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('token usage in session header', async ({ page }) => {
+    await selectRichSession(page);
+    await page.waitForTimeout(500);
+
+    // Token badge lives in SessionBreadcrumb
+    const badge = page.locator('.token-badge');
+    await expect(badge.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Capture the parent breadcrumb row for context
+    const breadcrumb = page.locator(
+      '.session-breadcrumb, .breadcrumb'
+    );
+    if (await breadcrumb.count() > 0) {
+      await snapEl(breadcrumb.first(), 'token-usage');
+    } else {
+      await snapEl(badge.first(), 'token-usage');
+    }
+  });
+});
+
 // ── Sub-agent tree ───────────────────────────────────────
 
 test.describe('Sub-agent tree', () => {
