@@ -135,6 +135,56 @@ agentsview v0.1.0 (abc1234) built 2025-01-15
 
 ---
 
+### `agentsview token-use`
+
+Print machine-readable token usage data for a single session.
+
+```bash
+agentsview token-use <session-id>
+```
+
+Use this command when you want structured token usage output for
+shell scripts, CI jobs, or other automation. Pass a session ID
+from the session detail header.
+
+Session ID format depends on the agent. For example, Claude
+root sessions usually use UUIDs like
+`550e8400-e29b-41d4-a716-446655440000`, Claude subagents use
+IDs like `agent-a86574e`, and some other agents use prefixes
+such as `codex:my-session-id`.
+
+If the agentsview server is already running, the command reads the
+current database state. If no server is running, it performs an
+on-demand sync for the requested session first, then returns the
+stored token totals.
+
+The JSON output format is experimental and may change.
+
+**Example:**
+
+```bash
+agentsview token-use 550e8400-e29b-41d4-a716-446655440000
+```
+
+```json
+{
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
+  "agent": "claude",
+  "project": "my-project",
+  "total_output_tokens": 15230,
+  "peak_context_tokens": 84000,
+  "server_running": false
+}
+```
+
+`total_output_tokens` is the session's total generated output
+tokens. `peak_context_tokens` is the highest context-token count
+seen during that session. `server_running` indicates whether the
+command used an already-running agentsview server rather than
+falling back to an on-demand session sync.
+
+---
+
 ### `agentsview help`
 
 Print usage information.
