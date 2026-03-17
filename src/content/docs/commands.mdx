@@ -147,6 +147,10 @@ Use this command when you want structured token usage output for
 shell scripts, CI jobs, or other automation. Pass a session ID
 from the session detail header.
 
+Session ID format depends on the agent. For example, Claude
+sessions use IDs like `my-session-id`, while some other agents
+use prefixes such as `codex:my-session-id`.
+
 If the agentsview server is already running, the command reads the
 current database state. If no server is running, it performs an
 on-demand sync for the requested session first, then returns the
@@ -157,12 +161,12 @@ The JSON output format is experimental and may change.
 **Example:**
 
 ```bash
-agentsview token-use claude:01abc123def456
+agentsview token-use my-test-session
 ```
 
 ```json
 {
-  "session_id": "claude:01abc123def456",
+  "session_id": "my-test-session",
   "agent": "claude",
   "project": "my-project",
   "total_output_tokens": 15230,
