@@ -148,8 +148,10 @@ shell scripts, CI jobs, or other automation. Pass a session ID
 from the session detail header.
 
 Session ID format depends on the agent. For example, Claude
-sessions use IDs like `my-session-id`, while some other agents
-use prefixes such as `codex:my-session-id`.
+root sessions usually use UUIDs like
+`550e8400-e29b-41d4-a716-446655440000`, Claude subagents use
+IDs like `agent-a86574e`, and some other agents use prefixes
+such as `codex:my-session-id`.
 
 If the agentsview server is already running, the command reads the
 current database state. If no server is running, it performs an
@@ -161,12 +163,12 @@ The JSON output format is experimental and may change.
 **Example:**
 
 ```bash
-agentsview token-use my-test-session
+agentsview token-use 550e8400-e29b-41d4-a716-446655440000
 ```
 
 ```json
 {
-  "session_id": "my-test-session",
+  "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "agent": "claude",
   "project": "my-project",
   "total_output_tokens": 15230,
