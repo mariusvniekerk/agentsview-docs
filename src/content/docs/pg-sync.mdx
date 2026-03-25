@@ -139,8 +139,18 @@ a single unified view.
 
 When binding to a non-loopback address, auth is enabled
 automatically. A bearer token is generated and printed on
-startup. Pass it via `Authorization: Bearer <token>` header
-or `?token=<token>` query parameter.
+startup. Pass it via `Authorization: Bearer <token>` header.
+The SSE watch endpoint also accepts `?token=<token>` as a
+query parameter since the `EventSource` API cannot set custom
+headers.
+
+:::caution
+Query-parameter tokens can leak through server logs, browser
+history, and Referer headers. Prefer the `Authorization`
+header for all non-SSE requests, and use TLS (via managed
+Caddy or an external reverse proxy) to protect tokens in
+transit.
+:::
 
 For managed Caddy mode, keep the backend `-host` on loopback
 and use `-proxy-bind-host` / `-public-port` to expose the
