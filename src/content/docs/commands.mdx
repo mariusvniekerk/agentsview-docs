@@ -191,12 +191,12 @@ Sync sessions from local SQLite to PostgreSQL. See
 [PostgreSQL Sync](/pg-sync/) for full documentation.
 
 ```bash
-agentsview pg push [--full]
+agentsview pg push [-full]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--full` | `false` | Force full resync and push |
+| `-full` | `false` | Force full local resync and re-push |
 
 ---
 
@@ -250,6 +250,9 @@ agentsview help
 | `ZENCODER_DIR` | `~/.zencoder/sessions` | Zencoder sessions directory |
 | `KIMI_DIR` | `~/.kimi/sessions` | Kimi sessions directory |
 | `AGENT_VIEWER_DATA_DIR` | `~/.agentsview` | Data directory (database, config) |
+| `AGENTSVIEW_PG_URL` | | PostgreSQL connection URL |
+| `AGENTSVIEW_PG_MACHINE` | | Machine name for PG push sync |
+| `AGENTSVIEW_PG_SCHEMA` | `agentsview` | PostgreSQL schema name |
 
 Environment variables override the built-in defaults. Set them
 in your shell profile or pass them inline:

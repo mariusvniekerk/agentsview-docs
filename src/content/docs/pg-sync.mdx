@@ -55,12 +55,15 @@ entirely by PostgreSQL. No local SQLite, file watching, or uploads
 Sync sessions from the local SQLite database to PostgreSQL.
 
 ```bash
-agentsview pg push [--full]
+agentsview pg push [-full]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--full` | `false` | Force full resync and push, bypassing change detection |
+| `-full` | `false` | Force full local resync and re-push, bypassing change detection |
+
+Push is on-demand — run it whenever you want to sync. There is
+no automatic background push.
 
 **What happens on push:**
 
@@ -70,11 +73,14 @@ agentsview pg push [--full]
 3. Upserts sessions, messages, and tool calls in batches of 50
 4. Advances the watermark timestamp on success
 
-Incremental pushes use a content heuristic (message count and
-content length statistics) to skip sessions that haven't
-changed. Use `--full` to bypass this and re-push everything —
-for example, after a schema reset or when session content was
-rewritten in place.
+Incremental pushes use a two-layer fingerprint to skip
+unchanged sessions: first, session metadata fields (project,
+agent, timestamps, message counts) are compared; then, per-
+session message statistics (count, content length sum/max/min,
+system message ordinals, tool call counts) are checked against
+PostgreSQL. Use `-full` to bypass both layers and re-push
+everything — for example, after a schema reset or when message
+content was rewritten in place.
 
 If any sessions fail to push, the watermark is not advanced so
 they are retried on the next run. The exit code is 1 when any
@@ -118,8 +124,10 @@ agentsview pg serve [flags]
 | `-port` | `8080` | Port |
 | `-base-path` | | URL prefix for reverse-proxy subpath |
 | `-public-url` | | Public-facing URL for proxy access |
-| `-public-port` | | Public-facing port |
+| `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
+| `-public-port` | `8443` | External port for managed proxy |
 | `-proxy` | | Managed proxy mode (`caddy`) |
+| `-caddy-bin` | `caddy` | Caddy binary path |
 | `-proxy-bind-host` | `0.0.0.0` | Caddy bind address |
 | `-tls-cert` | | TLS certificate path |
 | `-tls-key` | | TLS key path |
@@ -133,6 +141,11 @@ When binding to a non-loopback address, auth is enabled
 automatically. A bearer token is generated and printed on
 startup. Pass it via `Authorization: Bearer <token>` header
 or `?token=<token>` query parameter.
+
+For managed Caddy mode, keep the backend `-host` on loopback
+and use `-proxy-bind-host` / `-public-port` to expose the
+public listener. The `pg serve` and normal `serve` modes keep
+separate managed-Caddy state, so both can coexist on one host.
 
 **Examples:**
 
@@ -196,6 +209,25 @@ The connection string supports standard PostgreSQL parameters.
 Use `sslmode=require` or `sslmode=verify-full` for remote
 databases. Only use `sslmode=disable` for trusted local
 connections.
+
+Environment variables in the URL are expanded using `${VAR}`
+syntax:
+
+```toml
+[pg]
+url = "postgres://${PG_USER}:${PG_PASSWORD}@host:5432/dbname?sslmode=require"
+```
+
+### Environment Variables
+
+PostgreSQL settings can also be configured via environment
+variables, which override `config.toml` values:
+
+| Variable | Description |
+|----------|-------------|
+| `AGENTSVIEW_PG_URL` | PostgreSQL connection URL |
+| `AGENTSVIEW_PG_MACHINE` | Machine name for push sync |
+| `AGENTSVIEW_PG_SCHEMA` | Schema name (default `agentsview`) |
 
 ---
 
