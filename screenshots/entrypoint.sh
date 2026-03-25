@@ -23,6 +23,7 @@ if [ -z "$PG_VER" ]; then
   echo "Error: no PostgreSQL cluster found"
   exit 1
 fi
+export PGPORT="$PG_PGPORT"
 su postgres -c "pg_ctlcluster $PG_VER main start"
 
 for i in $(seq 1 15); do
@@ -60,7 +61,7 @@ agentsview pg push
 # Simulate a second machine by relabeling a subset of sessions
 # directly in PG. This gives the UI multi-machine data so
 # machine labels appear on session items.
-psql -U agentsview -h 127.0.0.1 -p "$PG_PGPORT" -d agentsview -q -v ON_ERROR_STOP=1 <<SQL
+psql -U agentsview -h 127.0.0.1 -d agentsview -q -v ON_ERROR_STOP=1 <<SQL
 SET search_path TO agentsview;
 UPDATE sessions
 SET machine = 'work-desktop'
