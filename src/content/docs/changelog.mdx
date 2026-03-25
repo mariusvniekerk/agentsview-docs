@@ -3,6 +3,47 @@ title: Changelog
 description: Release history for agentsview
 ---
 
+## 0.16.2
+<small>2026-03-25</small>
+
+**Bug fixes**
+
+- Detect Claude conversation forks across the full reply subtree so branched threads display correctly.
+
+---
+
+## 0.16.0
+<small>2026-03-24</small>
+
+**New features**
+
+- Add direct URL links for opening specific sessions, enabling bookmarks and sharing of session deep links.
+- Add machine labels and multi-host filtering to separate sessions by source machine in shared deployments.
+- Add focused transcript mode with a responsive header that strips intermediate tool calls and thinking blocks for easier reading.
+- Add `Del` as a keyboard shortcut to delete or archive the selected session.
+- Add Kimi (Moonshot AI) session support for importing and viewing Kimi conversations.
+- Add PostgreSQL push sync and a read-only server mode (`pg push`, `pg serve`) for shared multi-user deployments backed by a central PostgreSQL database.
+
+**Improvements**
+
+- Group command palette search results by session, add a relevance/recency sort toggle, and match against session names in addition to message content.
+- Show model information in the session UI, including Codex session models, displayed in message headers.
+- Use OpenCode session titles as display names in the session list.
+- Improve the mobile layout for smaller screens with a responsive sidebar and viewport-aware keyboard shortcuts.
+- Add managed Caddy support to `pg serve` for simpler TLS-terminated shared deployments.
+- Publish platform-specific wheels to PyPI for easier installation via `pip install agentsview`.
+- Add standard macOS app menu actions for Hide and Hide Others.
+
+**Bug fixes**
+
+- Show user messages that begin with skill or command invocations (e.g. `[Skill: name]`) in transcripts instead of hiding them.
+- Prevent Linux desktop app freezes with improved runtime CSP handling in the Tauri configuration.
+- Restore desktop copy, paste, and cut keyboard shortcuts through the Edit menu.
+- Fix pinned message navigation in very large sessions where the virtualizer could stop mid-scroll before reaching the target message.
+- Surface insight generation errors directly in the UI with error status and message display instead of silently failing.
+
+---
+
 ## 0.15.0
 <small>2026-03-17</small>
 

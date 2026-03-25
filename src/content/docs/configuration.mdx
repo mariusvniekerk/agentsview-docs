@@ -12,20 +12,24 @@ defaulting to `~/.agentsview/`. Override with the
 ```
 ~/.agentsview/
 ├── sessions.db     # SQLite database (WAL mode)
-├── config.json     # Configuration file
+├── config.toml     # Configuration file
 └── uploads/        # Uploaded session files
 ```
 
 ## Config File
 
-The config file at `~/.agentsview/config.json` is auto-created
+The config file at `~/.agentsview/config.toml` is auto-created
 on first run. It stores persistent settings that survive restarts.
 
-```json
-{
-  "cursor_secret": "base64-encoded-secret",
-  "github_token": "ghp_xxxxx"
-}
+:::note
+The config format changed from JSON to TOML. Existing
+`config.json` files are automatically migrated to `config.toml`
+on first run (the JSON file is renamed to `config.json.bak`).
+:::
+
+```toml
+cursor_secret = "base64-encoded-secret"
+github_token = "ghp_xxxxx"
 ```
 
 | Field | Description |
@@ -37,7 +41,8 @@ on first run. It stores persistent settings that survive restarts.
 | `auth_token` | Auto-generated 256-bit bearer token for remote access |
 | `public_url` | Public URL for hostname/proxy access and origin validation |
 | `public_origins` | Array of additional trusted CORS origins |
-| `proxy` | Managed proxy configuration object — see [Remote Access](/remote-access/) |
+| `[proxy]` | Managed proxy configuration table — see [Remote Access](/remote-access/) |
+| `[pg]` | PostgreSQL sync configuration — see [PostgreSQL Sync](/pg-sync/) |
 
 The `cursor_secret` is generated automatically on first run.
 The `github_token` can be set via the web UI Settings page or
@@ -47,7 +52,7 @@ see [Remote Access](/remote-access/) for details.
 
 ## Session Discovery
 
-agentsview auto-discovers session files from twelve agent types:
+agentsview auto-discovers session files from thirteen agent types:
 
 | Agent | Default Directory | File Format |
 |-------|-------------------|-------------|
@@ -63,6 +68,7 @@ agentsview auto-discovers session files from twelve agent types:
 | Pi | `~/.pi/agent/sessions/` | JSONL per session |
 | iFlow | `~/.iflow/projects/` | JSONL per session |
 | Zencoder | `~/.zencoder/sessions/` | JSONL per session |
+| Kimi | `~/.kimi/sessions/` | JSONL per session |
 
 **VS Code Copilot default directories** vary by platform:
 
@@ -89,31 +95,31 @@ export OPENCLAW_DIR=~/custom/openclaw
 export PI_DIR=~/custom/pi
 export IFLOW_DIR=~/custom/iflow
 export ZENCODER_DIR=~/custom/zencoder
+export KIMI_DIR=~/custom/kimi
 ```
 
 ### Multiple Directories
 
 To scan more than one directory per agent — for example, when
 running Windows and WSL side by side — add array fields to
-`~/.agentsview/config.json`:
+`~/.agentsview/config.toml`:
 
-```json
-{
-  "claude_project_dirs": [
-    "~/.claude/projects",
-    "/mnt/c/Users/you/.claude/projects"
-  ],
-  "codex_sessions_dirs": [
-    "~/.codex/sessions"
-  ]
-}
+```toml
+claude_project_dirs = [
+  "~/.claude/projects",
+  "/mnt/c/Users/you/.claude/projects",
+]
+
+codex_sessions_dirs = [
+  "~/.codex/sessions",
+]
 ```
 
 The corresponding fields are `claude_project_dirs`,
 `codex_sessions_dirs`, `copilot_dirs`,
 `cursor_project_dirs`, `gemini_dirs`, `opencode_dirs`,
 `amp_dirs`, `vscode_copilot_dirs`, `openclaw_dirs`,
-`iflow_dirs`, and `zencoder_dirs`.
+`iflow_dirs`, `zencoder_dirs`, and `kimi_dirs`.
 Each accepts an array of paths. When set, these take precedence
 over the single-directory environment variable and the default
 path.

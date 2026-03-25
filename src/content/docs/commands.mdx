@@ -185,6 +185,45 @@ falling back to an on-demand session sync.
 
 ---
 
+### `agentsview pg push`
+
+Sync sessions from local SQLite to PostgreSQL. See
+[PostgreSQL Sync](/pg-sync/) for full documentation.
+
+```bash
+agentsview pg push [--full]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--full` | `false` | Force full resync and push |
+
+---
+
+### `agentsview pg status`
+
+Show PostgreSQL sync status.
+
+```bash
+agentsview pg status
+```
+
+---
+
+### `agentsview pg serve`
+
+Start a read-only web UI backed by PostgreSQL. See
+[PostgreSQL Sync](/pg-sync/) for full documentation.
+
+```bash
+agentsview pg serve [flags]
+```
+
+Accepts the same serve flags (`-host`, `-port`, `-proxy`, etc.)
+plus PostgreSQL configuration from `config.toml`.
+
+---
+
 ### `agentsview help`
 
 Print usage information.
@@ -209,6 +248,7 @@ agentsview help
 | `PI_DIR` | `~/.pi/agent/sessions` | Pi sessions directory |
 | `IFLOW_DIR` | `~/.iflow/projects` | iFlow projects directory |
 | `ZENCODER_DIR` | `~/.zencoder/sessions` | Zencoder sessions directory |
+| `KIMI_DIR` | `~/.kimi/sessions` | Kimi sessions directory |
 | `AGENT_VIEWER_DATA_DIR` | `~/.agentsview` | Data directory (database, config) |
 
 Environment variables override the built-in defaults. Set them

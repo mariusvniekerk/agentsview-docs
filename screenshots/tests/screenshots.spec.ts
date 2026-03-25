@@ -868,3 +868,113 @@ test.describe('Sub-agent tree', () => {
     await snapEl(sidebar, 'subagent-tree');
   });
 });
+
+// ── Focused transcript mode ─────────────────────────────
+
+test.describe('Focused transcript mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await selectRichSession(page);
+  });
+
+  test('focused transcript view', async ({ page }) => {
+    // Look for the transcript mode toggle button
+    const toggleBtn = page.locator(
+      'button[title*="transcript" i], ' +
+      'button[title*="Transcript" i], ' +
+      'button[title*="focused" i], ' +
+      'button[title*="Focused" i], ' +
+      '.transcript-mode-btn'
+    );
+    if (await toggleBtn.count() > 0) {
+      await toggleBtn.first().click();
+      await page.waitForTimeout(1000);
+      await snap(page, 'focused-transcript');
+
+      // Toggle back to normal mode
+      await toggleBtn.first().click();
+    }
+  });
+});
+
+// ── Machine labels (pg sync) ────────────────────────────
+
+test.describe('Machine labels', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('machine labels on session items', async ({ page }) => {
+    // Machine labels appear when sessions have non-local
+    // machine names (only in pg sync deployments). Capture
+    // the sidebar — if no machine tags exist in the test DB,
+    // this still produces a valid sidebar screenshot.
+    const machineTag = page.locator('.machine-tag, .machine-label');
+    if (await machineTag.count() > 0) {
+      const sidebar = page.locator('.sidebar');
+      await snapEl(sidebar, 'machine-labels');
+    }
+  });
+});
+
+// ── Search grouping and sort ────────────────────────────
+
+test.describe('Search grouping', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('grouped search results with sort toggle', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await page.waitForSelector('.palette-overlay', {
+      timeout: 5_000,
+    });
+
+    const input = page.locator('.palette-input');
+    await input.fill('implement');
+    await page.waitForTimeout(1500);
+
+    // Look for the sort toggle
+    const sortToggle = page.locator(
+      '.sort-toggle, button[title*="sort" i], ' +
+      'button[title*="Sort" i]'
+    );
+    if (await sortToggle.count() > 0) {
+      // Toggle to recency sort
+      await sortToggle.first().click();
+      await page.waitForTimeout(500);
+    }
+
+    await snap(page, 'search-grouped');
+  });
+});
+
+// ── Model info in session header ────────────────────────
+
+test.describe('Model info', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('model name in session header', async ({ page }) => {
+    await selectRichSession(page);
+    await page.waitForTimeout(500);
+
+    // Model badge/label in the session breadcrumb area
+    const modelBadge = page.locator(
+      '.model-badge, .model-label, .model-name'
+    );
+    if (await modelBadge.count() > 0) {
+      const breadcrumb = page.locator(
+        '.session-breadcrumb, .breadcrumb'
+      );
+      if (await breadcrumb.count() > 0) {
+        await snapEl(breadcrumb.first(), 'model-info');
+      }
+    }
+  });
+});

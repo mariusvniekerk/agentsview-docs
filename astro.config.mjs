@@ -45,6 +45,7 @@ export default defineConfig({
         { label: 'CLI Reference', slug: 'commands' },
         { label: 'Configuration', slug: 'configuration' },
         { label: 'Remote Access', slug: 'remote-access' },
+        { label: 'PostgreSQL Sync', slug: 'pg-sync' },
         { label: 'Changelog', slug: 'changelog' },
       ],
     }),
