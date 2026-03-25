@@ -195,7 +195,7 @@ allow_insecure = false
 | Field | Default | Description |
 |-------|---------|-------------|
 | `url` | (required) | PostgreSQL connection string |
-| `machine_name` | system hostname | Identifies the pushing machine |
+| `machine_name` | OS hostname | Identifies the pushing machine; defaults to `os.Hostname()` if omitted |
 | `schema` | `agentsview` | PostgreSQL schema name |
 | `allow_insecure` | `false` | Allow non-TLS connections to non-loopback hosts |
 
