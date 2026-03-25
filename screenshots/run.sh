@@ -50,7 +50,9 @@ echo "Assembling build context..."
 rsync -a \
   --exclude='node_modules' \
   --exclude='.cache' \
+  --exclude='.git' \
   --exclude='/agentsview' \
+  --exclude='desktop/src-tauri/target' \
   "$AGENTSVIEW_SRC/" "$CONTEXT/agentsview/"
 
 # Copy source database
