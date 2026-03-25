@@ -904,10 +904,9 @@ test.describe('Focused transcript mode', () => {
 // ── Machine labels (pg sync) ────────────────────────────
 
 test.describe('Machine labels', () => {
-  // Skip if no PG server is available
-  test.skip(!PG_BASE_URL, 'PG_BASE_URL not set');
-
   test('machine labels on session items', async ({ page }) => {
+    test.skip(!PG_BASE_URL, 'PG_BASE_URL not set');
+
     await page.setViewportSize(FULL);
     await page.goto(PG_BASE_URL);
     await page.waitForSelector('.session-item', {
