@@ -68,7 +68,7 @@ SET machine = 'work-desktop'
 WHERE id IN (
   SELECT id FROM sessions
   ORDER BY created_at DESC
-  LIMIT (SELECT COUNT(*) / 3 FROM sessions)
+  LIMIT GREATEST(1, (SELECT COUNT(*) / 3 FROM sessions))
 );
 SQL
 

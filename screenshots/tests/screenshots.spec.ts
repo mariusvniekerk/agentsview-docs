@@ -942,11 +942,14 @@ test.describe('Search grouping', () => {
     await input.fill('implement');
     await page.waitForTimeout(1500);
 
-    // Assert results and sort controls rendered
+    // Assert grouped results rendered (each result shows a
+    // session name via .item-name, indicating per-session grouping)
     const results = page.locator('.palette-results .palette-item');
     await expect(results.first()).toBeVisible({
       timeout: 5_000,
     });
+    const sessionName = results.first().locator('.item-name');
+    await expect(sessionName).toBeVisible();
     const sortBtns = page.locator('.sort-btn');
     await expect(sortBtns.first()).toBeVisible({
       timeout: 5_000,
