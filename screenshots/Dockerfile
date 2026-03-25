@@ -1,6 +1,9 @@
 # Stage 1: Build agentsview binary
 FROM golang:1.25-bookworm AS builder
 
+ARG AV_VERSION=dev
+ARG AV_COMMIT=unknown
+
 RUN apt-get update && \
     apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
@@ -9,9 +12,10 @@ RUN apt-get update && \
 WORKDIR /src
 COPY agentsview/ .
 
-# Build frontend and Go binary via Makefile
+# Build frontend and Go binary. Pass version info resolved on
+# the host (the .git dir is excluded from the build context).
 RUN cd frontend && npm ci
-RUN make build
+RUN make build VERSION="$AV_VERSION" COMMIT="$AV_COMMIT"
 RUN cp agentsview /bin/agentsview
 
 # Stage 2: Extract test database (open-source projects only)

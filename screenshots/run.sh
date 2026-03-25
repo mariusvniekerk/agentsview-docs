@@ -46,6 +46,10 @@ trap 'rm -rf "$CONTEXT"' EXIT
 
 echo "Assembling build context..."
 
+# Resolve version info from git before copying (we exclude .git)
+AV_VERSION=$(cd "$AGENTSVIEW_SRC" && git describe --tags --always --dirty 2>/dev/null || echo "dev")
+AV_COMMIT=$(cd "$AGENTSVIEW_SRC" && git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
 # Copy agentsview source (exclude heavy/unnecessary dirs)
 rsync -a \
   --exclude='node_modules' \
@@ -67,7 +71,10 @@ echo ""
 
 # Build Docker image
 echo "Building Docker image (this may take a few minutes on first run)..."
-docker build -t "$IMAGE_NAME" "$CONTEXT"
+docker build \
+  --build-arg AV_VERSION="$AV_VERSION" \
+  --build-arg AV_COMMIT="$AV_COMMIT" \
+  -t "$IMAGE_NAME" "$CONTEXT"
 
 echo ""
 
