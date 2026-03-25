@@ -965,21 +965,15 @@ test.describe('Model info', () => {
     await waitForApp(page);
   });
 
-  test('model name in session header', async ({ page }) => {
+  test('model badge is visible in session header', async ({ page }) => {
     await selectRichSession(page);
     await page.waitForTimeout(500);
 
-    // Model badge/label in the session breadcrumb area
-    const modelBadge = page.locator(
-      '.model-badge, .model-label, .model-name'
-    );
-    if (await modelBadge.count() > 0) {
-      const breadcrumb = page.locator(
-        '.session-breadcrumb, .breadcrumb'
-      );
-      if (await breadcrumb.count() > 0) {
-        await snapEl(breadcrumb.first(), 'model-info');
-      }
-    }
+    // Assert the model badge renders — no separate screenshot
+    // since it shares the breadcrumb with the token-usage shot.
+    const modelBadge = page.locator('.model-badge');
+    await expect(modelBadge.first()).toBeVisible({
+      timeout: 5_000,
+    });
   });
 });
