@@ -882,22 +882,20 @@ test.describe('Focused transcript mode', () => {
   });
 
   test('focused transcript view', async ({ page }) => {
-    // Look for the transcript mode toggle button
-    const toggleBtn = page.locator(
-      'button[title*="transcript" i], ' +
-      'button[title*="Transcript" i], ' +
-      'button[title*="focused" i], ' +
-      'button[title*="Focused" i], ' +
-      '.transcript-mode-btn'
+    // Click the "Focused" pill in the transcript strip
+    const focusedPill = page.locator(
+      'button[aria-label="Focused transcript mode"]'
     );
-    if (await toggleBtn.count() > 0) {
-      await toggleBtn.first().click();
-      await page.waitForTimeout(1000);
-      await snap(page, 'focused-transcript');
+    await expect(focusedPill).toBeVisible({ timeout: 5_000 });
+    await focusedPill.click();
+    await page.waitForTimeout(1000);
+    await snap(page, 'focused-transcript');
 
-      // Toggle back to normal mode
-      await toggleBtn.first().click();
-    }
+    // Toggle back to normal mode
+    const normalPill = page.locator(
+      'button[aria-label="Normal transcript mode"]'
+    );
+    await normalPill.click();
   });
 });
 
