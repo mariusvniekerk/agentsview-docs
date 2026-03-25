@@ -942,16 +942,27 @@ test.describe('Search grouping', () => {
     await input.fill('implement');
     await page.waitForTimeout(1500);
 
-    // Look for the sort toggle
-    const sortToggle = page.locator(
-      '.sort-toggle, button[title*="sort" i], ' +
-      'button[title*="Sort" i]'
-    );
-    if (await sortToggle.count() > 0) {
-      // Toggle to recency sort
-      await sortToggle.first().click();
-      await page.waitForTimeout(500);
-    }
+    // Assert results and sort controls rendered
+    const results = page.locator('.palette-results .palette-item');
+    await expect(results.first()).toBeVisible({
+      timeout: 5_000,
+    });
+    const sortBtns = page.locator('.sort-btn');
+    await expect(sortBtns.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Verify relevance is the default active sort
+    const relevanceBtn = page.locator('.sort-btn.active');
+    await expect(relevanceBtn).toHaveText('Relevance');
+
+    // Toggle to recency and verify it becomes active
+    const recencyBtn = page.locator('.sort-btn', {
+      hasText: 'Recency',
+    });
+    await recencyBtn.click();
+    await page.waitForTimeout(500);
+    await expect(recencyBtn).toHaveClass(/active/);
 
     await snap(page, 'search-grouped');
   });
