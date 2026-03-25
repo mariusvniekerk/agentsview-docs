@@ -7,6 +7,9 @@ const DIR = process.env.SCREENSHOT_DIR || join(
 
 const FULL = { width: 1440, height: 900 };
 
+// PG serve instance for pg-sync screenshots (machine labels, etc.)
+const PG_BASE_URL = process.env.PG_BASE_URL || '';
+
 async function snap(page: Page, name: string) {
   await page.screenshot({
     path: join(DIR, `${name}.png`),
@@ -901,21 +904,26 @@ test.describe('Focused transcript mode', () => {
 // ── Machine labels (pg sync) ────────────────────────────
 
 test.describe('Machine labels', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize(FULL);
-    await waitForApp(page);
-  });
+  // Skip if no PG server is available
+  test.skip(!PG_BASE_URL, 'PG_BASE_URL not set');
 
   test('machine labels on session items', async ({ page }) => {
-    // Machine labels appear when sessions have non-local
-    // machine names (only in pg sync deployments). Capture
-    // the sidebar — if no machine tags exist in the test DB,
-    // this still produces a valid sidebar screenshot.
-    const machineTag = page.locator('.machine-tag, .machine-label');
-    if (await machineTag.count() > 0) {
-      const sidebar = page.locator('.sidebar');
-      await snapEl(sidebar, 'machine-labels');
-    }
+    await page.setViewportSize(FULL);
+    await page.goto(PG_BASE_URL);
+    await page.waitForSelector('.session-item', {
+      timeout: 15_000,
+    });
+    await page.waitForTimeout(2000);
+
+    const machineTag = page.locator(
+      '.machine-tag, .machine-label'
+    );
+    await expect(machineTag.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    const sidebar = page.locator('.sidebar');
+    await snapEl(sidebar, 'machine-labels');
   });
 });
 

@@ -29,7 +29,11 @@ FROM node:22-bookworm
 
 WORKDIR /work
 
-# Install Playwright dependencies
+# Install PostgreSQL and Playwright dependencies
+RUN apt-get update && \
+    apt-get install -y postgresql postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY screenshots/package.json screenshots/package-lock.json ./
 RUN npm ci
 RUN npx playwright install --with-deps chromium
