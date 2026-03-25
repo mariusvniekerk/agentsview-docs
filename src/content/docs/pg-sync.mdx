@@ -171,7 +171,9 @@ agentsview pg serve \
   -tls-cert /path/to/cert.pem \
   -tls-key /path/to/key.pem
 
-# Remote access with token auth (no Caddy)
+# Remote access on a trusted private network (no TLS)
+# Only use this behind a VPN or on a private LAN —
+# tokens are sent in cleartext over plain HTTP.
 agentsview pg serve -host 0.0.0.0 -port 8080
 ```
 

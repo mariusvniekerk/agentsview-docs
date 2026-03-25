@@ -16,7 +16,9 @@ cp /data/sessions.db "$DATA_DIR/sessions.db"
 # was set to trust auth in the Dockerfile. Detect the installed
 # PG version rather than hardcoding it.
 echo "Starting PostgreSQL..."
-PG_VER=$(pg_lsclusters -h 2>/dev/null | awk '{print $1; exit}')
+PG_CLUSTER=$(pg_lsclusters -h 2>/dev/null | head -1)
+PG_VER=$(echo "$PG_CLUSTER" | awk '{print $1}')
+PG_PGPORT=$(echo "$PG_CLUSTER" | awk '{print $3}')
 if [ -z "$PG_VER" ]; then
   echo "Error: no PostgreSQL cluster found"
   exit 1
@@ -35,7 +37,7 @@ done
 # Create role and database
 su postgres -c "createuser agentsview" 2>/dev/null || true
 su postgres -c "createdb -O agentsview agentsview" 2>/dev/null || true
-PG_URL="postgres://agentsview@127.0.0.1:5432/agentsview?sslmode=disable"
+PG_URL="postgres://agentsview@127.0.0.1:${PG_PGPORT}/agentsview?sslmode=disable"
 
 echo "PostgreSQL ready."
 
@@ -58,7 +60,7 @@ agentsview pg push
 # Simulate a second machine by relabeling a subset of sessions
 # directly in PG. This gives the UI multi-machine data so
 # machine labels appear on session items.
-psql -U agentsview -h 127.0.0.1 -d agentsview -q -v ON_ERROR_STOP=1 <<SQL
+psql -U agentsview -h 127.0.0.1 -p "$PG_PGPORT" -d agentsview -q -v ON_ERROR_STOP=1 <<SQL
 SET search_path TO agentsview;
 UPDATE sessions
 SET machine = 'work-desktop'
