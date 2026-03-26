@@ -7,6 +7,9 @@ const DIR = process.env.SCREENSHOT_DIR || join(
 
 const FULL = { width: 1440, height: 900 };
 
+// PG serve instance for pg-sync screenshots (machine labels, etc.)
+const PG_BASE_URL = process.env.PG_BASE_URL || '';
+
 async function snap(page: Page, name: string) {
   await page.screenshot({
     path: join(DIR, `${name}.png`),
@@ -866,5 +869,125 @@ test.describe('Sub-agent tree', () => {
 
     const sidebar = page.locator('.sidebar');
     await snapEl(sidebar, 'subagent-tree');
+  });
+});
+
+// ── Focused transcript mode ─────────────────────────────
+
+test.describe('Focused transcript mode', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await selectRichSession(page);
+  });
+
+  test('focused transcript view', async ({ page }) => {
+    // Click the "Focused" pill in the transcript strip
+    const focusedPill = page.locator(
+      'button[aria-label="Focused transcript mode"]'
+    );
+    await expect(focusedPill).toBeVisible({ timeout: 5_000 });
+    await focusedPill.click();
+    await page.waitForTimeout(1000);
+    await snap(page, 'focused-transcript');
+
+    // Toggle back to normal mode
+    const normalPill = page.locator(
+      'button[aria-label="Normal transcript mode"]'
+    );
+    await normalPill.click();
+  });
+});
+
+// ── Machine labels (pg sync) ────────────────────────────
+
+test.describe('Machine labels', () => {
+  test('machine labels on session items', async ({ page }) => {
+    test.skip(!PG_BASE_URL, 'PG_BASE_URL not set');
+
+    await page.setViewportSize(FULL);
+    await page.goto(PG_BASE_URL);
+    await page.waitForSelector('.session-item', {
+      timeout: 15_000,
+    });
+    await page.waitForTimeout(2000);
+
+    const machineTag = page.locator(
+      '.machine-tag, .machine-label'
+    );
+    await expect(machineTag.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    const sidebar = page.locator('.sidebar');
+    await snapEl(sidebar, 'machine-labels');
+  });
+});
+
+// ── Search grouping and sort ────────────────────────────
+
+test.describe('Search grouping', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('grouped search results with sort toggle', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await page.waitForSelector('.palette-overlay', {
+      timeout: 5_000,
+    });
+
+    const input = page.locator('.palette-input');
+    await input.fill('implement');
+    await page.waitForTimeout(1500);
+
+    // Assert grouped results rendered (each result shows a
+    // session name via .item-name, indicating per-session grouping)
+    const results = page.locator('.palette-results .palette-item');
+    await expect(results.first()).toBeVisible({
+      timeout: 5_000,
+    });
+    const sessionName = results.first().locator('.item-name');
+    await expect(sessionName).toBeVisible();
+    const sortBtns = page.locator('.sort-btn');
+    await expect(sortBtns.first()).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Verify relevance is the default active sort
+    const relevanceBtn = page.locator('.sort-btn.active');
+    await expect(relevanceBtn).toHaveText('Relevance');
+
+    // Toggle to recency and verify it becomes active
+    const recencyBtn = page.locator('.sort-btn', {
+      hasText: 'Recency',
+    });
+    await recencyBtn.click();
+    await page.waitForTimeout(500);
+    await expect(recencyBtn).toHaveClass(/active/);
+
+    await snap(page, 'search-grouped');
+  });
+});
+
+// ── Model info in session header ────────────────────────
+
+test.describe('Model info', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('model badge is visible in session header', async ({ page }) => {
+    await selectRichSession(page);
+    await page.waitForTimeout(500);
+
+    // Assert the model badge renders — no separate screenshot
+    // since it shares the breadcrumb with the token-usage shot.
+    const modelBadge = page.locator('.model-badge');
+    await expect(modelBadge.first()).toBeVisible({
+      timeout: 5_000,
+    });
   });
 });

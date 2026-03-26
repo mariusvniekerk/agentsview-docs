@@ -19,7 +19,18 @@ The desktop app and CLI share the same data directory
 complementary, not mutually exclusive.
 :::
 
-### Command Line
+### pip / uvx
+
+```bash
+pip install agentsview    # install permanently
+uvx agentsview            # or run without installing
+```
+
+Platform-specific wheels are published to PyPI for Linux
+(x86_64, aarch64), macOS (x86_64, arm64), and Windows
+(x86_64).
+
+### Shell Script
 
 ```bash
 curl -fsSL https://agentsview.io/install.sh | bash
@@ -34,12 +45,6 @@ powershell -ExecutionPolicy ByPass -c "irm https://agentsview.io/install.ps1 | i
 The installer detects your OS and architecture, downloads the latest
 release from GitHub Releases, verifies the SHA-256 checksum, and
 installs the binary.
-
-Verify the installation:
-
-```bash
-agentsview version
-```
 
 ### Build from source
 
@@ -69,7 +74,7 @@ agentsview
 This will:
 
 1. Initialize the SQLite database at `~/.agentsview/sessions.db`
-2. Discover and sync sessions from Claude Code, Codex, Copilot CLI, Cursor, Gemini CLI, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi, iFlow, and Zencoder
+2. Discover and sync sessions from all [supported agents](/configuration/#session-discovery)
 3. Start watching session directories for changes
 4. Launch the web UI at `http://127.0.0.1:8080`
 
@@ -101,6 +106,7 @@ export OPENCLAW_DIR=~/custom/openclaw/agents
 export PI_DIR=~/custom/pi/sessions
 export IFLOW_DIR=~/custom/iflow/projects
 export ZENCODER_DIR=~/custom/zencoder/sessions
+export KIMI_DIR=~/custom/kimi/sessions
 agentsview
 ```
 

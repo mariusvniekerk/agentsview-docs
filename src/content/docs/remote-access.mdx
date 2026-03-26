@@ -10,12 +10,10 @@ network — while keeping the server and data on your machine.
 
 ## Quick Setup
 
-Enable remote access in `config.json`:
+Enable remote access in `config.toml`:
 
-```json
-{
-  "remote_access": true
-}
+```toml
+remote_access = true
 ```
 
 Then start the server:
@@ -37,13 +35,13 @@ token in the `Authorization` header or configure it in the
 Settings page.
 
 You can also enable remote access from the Settings page in
-the web UI without editing `config.json` directly.
+the web UI without editing `config.toml` directly.
 
 ## Authentication
 
 Remote access uses bearer token authentication. When
 `remote_access` is enabled, a cryptographically random token
-is auto-generated and stored in `config.json`. All API
+is auto-generated and stored in `config.toml`. All API
 requests must include it:
 
 ```
@@ -99,16 +97,14 @@ Flags can also be comma-separated:
 agentsview -public-origin https://a.example.com,https://b.example.com
 ```
 
-These can be set in `config.json`:
+These can be set in `config.toml`:
 
-```json
-{
-  "public_url": "https://agents.example.com",
-  "public_origins": [
-    "https://agents.example.com",
-    "https://internal.example.com"
-  ]
-}
+```toml
+public_url = "https://agents.example.com"
+public_origins = [
+  "https://agents.example.com",
+  "https://internal.example.com",
+]
 ```
 
 The server derives trusted `Host` and `Origin` values from
@@ -204,24 +200,22 @@ access) are noted in the UI.
 
 ## Config File Reference
 
-Remote access fields in `~/.agentsview/config.json`:
+Remote access fields in `~/.agentsview/config.toml`:
 
-```json
-{
-  "remote_access": true,
-  "auth_token": "auto-generated-base64-token",
-  "public_url": "https://agents.example.com",
-  "public_origins": ["https://agents.example.com"],
-  "proxy": {
-    "mode": "caddy",
-    "bin": "caddy",
-    "bind_host": "127.0.0.1",
-    "public_port": 8443,
-    "tls_cert": "/path/to/cert.pem",
-    "tls_key": "/path/to/key.pem",
-    "allowed_subnets": ["192.168.1.0/24"]
-  }
-}
+```toml
+remote_access = true
+auth_token = "auto-generated-base64-token"
+public_url = "https://agents.example.com"
+public_origins = ["https://agents.example.com"]
+
+[proxy]
+mode = "caddy"
+bin = "caddy"
+bind_host = "127.0.0.1"
+public_port = 8443
+tls_cert = "/path/to/cert.pem"
+tls_key = "/path/to/key.pem"
+allowed_subnets = ["192.168.1.0/24"]
 ```
 
 | Field | Description |

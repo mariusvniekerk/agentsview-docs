@@ -1,6 +1,9 @@
 # Stage 1: Build agentsview binary
 FROM golang:1.25-bookworm AS builder
 
+ARG AV_VERSION=dev
+ARG AV_COMMIT=unknown
+
 RUN apt-get update && \
     apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
@@ -9,9 +12,10 @@ RUN apt-get update && \
 WORKDIR /src
 COPY agentsview/ .
 
-# Build frontend and Go binary via Makefile
+# Build frontend and Go binary. Pass version info resolved on
+# the host (the .git dir is excluded from the build context).
 RUN cd frontend && npm ci
-RUN make build
+RUN make build VERSION="$AV_VERSION" COMMIT="$AV_COMMIT"
 RUN cp agentsview /bin/agentsview
 
 # Stage 2: Extract test database (open-source projects only)
@@ -29,7 +33,18 @@ FROM node:22-bookworm
 
 WORKDIR /work
 
-# Install Playwright dependencies
+# Install PostgreSQL, curl (for health checks), and Playwright
+RUN apt-get update && \
+    apt-get install -y postgresql postgresql-client curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Allow local TCP connections without password (trust auth).
+# The cluster is auto-created by the Debian package. Write
+# a trust-only pg_hba.conf for the auto-created cluster.
+RUN PG_HBA=$(find /etc/postgresql -name pg_hba.conf | head -1) && \
+    test -n "$PG_HBA" && \
+    printf 'local all all trust\nhost all all 127.0.0.1/32 trust\nhost all all ::1/128 trust\n' > "$PG_HBA"
+
 COPY screenshots/package.json screenshots/package-lock.json ./
 RUN npm ci
 RUN npx playwright install --with-deps chromium

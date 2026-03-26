@@ -176,11 +176,17 @@ Each session item shows:
 - **Agent indicator** — color-coded dot and agent name label in
   the agent's accent color. Recently active sessions show a
   glowing animation.
-- **Session name** — first message text, truncated to 50
-  characters
+- **Session name** — display name if set, otherwise first message
+  text truncated to 50 characters. OpenCode sessions use their
+  native session titles.
+- **Model name** — the AI model used for the session, shown when
+  available (including Codex session models).
 - **Star button** — click the star icon or press `s` to star
   a session. Starred sessions persist in the SQLite database
   so they survive server restarts.
+- **Machine label** — when using [PostgreSQL sync](/pg-sync/),
+  sessions from other machines show a machine name tag. Only
+  visible in shared multi-host deployments.
 - **Project name** — abbreviated, right-aligned
 - **Relative time** — "2h ago", "Mon", "Dec 1"
 - **User prompt count** — number of user messages in the session
@@ -227,10 +233,10 @@ dropdown with three filter categories that can be combined:
 - **Starred** — toggle to show only starred sessions
 - **Recently Active** — toggle to show only sessions updated
   within the last 24 hours
-- **Agent** — select one or more agents (Claude, Copilot, Codex,
-  Cursor, Gemini, OpenCode, Amp, VS Code Copilot, OpenClaw, Pi,
-  iFlow, Zencoder) to filter sessions. Click an agent to toggle its
-  selection; multiple agents can be active at once.
+- **Agent** — select one or more
+  [supported agents](/configuration/#session-discovery) to filter
+  sessions. Click an agent to toggle its selection; multiple
+  agents can be active at once.
 - **Min Prompts** — filter to sessions with at least 2, 3, 5,
   or 10 user messages
 - **Include single-turn** — toggle to include sessions with one
@@ -245,12 +251,24 @@ to reset all filters at once.
 Filter state syncs between the session sidebar and the analytics
 dashboard — applying a filter in one updates the other.
 
+### Direct Session Links
+
+Each session has a shareable URL. Click the session ID in the
+detail header to copy the link, or use the URL bar directly:
+
+```
+/sessions/550e8400-e29b-41d4-a716-446655440000
+```
+
+Session URLs work as bookmarks and can be shared with teammates
+when using [PostgreSQL sync](/pg-sync/) for shared deployments.
+
 ### URL Filters
 
 URL parameters are supported for direct linking:
 
 ```
-#/sessions?project=myapp&agent=claude&date_from=2025-01-01
+/sessions?project=myapp&agent=claude&date_from=2025-01-01
 ```
 
 Available URL filters: `project`, `agent`, `date`, `date_from`,
@@ -286,6 +304,20 @@ them with the `l` key or the layout button in the header:
 | Default | Full card layout with colored borders and spacing |
 | Compact | Condensed view with minimal spacing |
 | Stream | Continuous flow optimized for reading |
+
+### Focused Transcript Mode
+
+Focused mode strips intermediate tool calls, thinking blocks,
+and partial assistant messages, showing only user prompts and
+final assistant responses. This makes long sessions easier to
+read as a clean conversation transcript.
+
+![Focused transcript mode](/screenshots/focused-transcript.png)
+
+Toggle between Normal and Focused mode using the transcript
+mode button in the session header. The header adjusts
+responsively to fit the available space. The mode preference
+is saved in localStorage.
 
 ### Message Display
 
@@ -430,15 +462,27 @@ name or first message.
 
 ### Full-Text Search
 
-Type 3 or more characters to search across all message content.
-Results appear in real time with 300ms debounce.
+Type 3 or more characters to search across all message content
+and session names. Results appear in real time with 300ms
+debounce.
 
 ![Search results](/screenshots/search-results.png)
+
+Results are grouped by session — each session shows its best
+matching result. This prevents a single long session from
+dominating the results list. The search also matches against
+session display names and first messages, so you can find
+sessions by title.
+
+Use the sort toggle in the palette header to switch between
+**Relevance** (best matches first) and **Recency** (newest
+sessions first).
 
 Each result shows:
 
 - **Role badge** — U (user) or A (assistant) in a colored box
 - **Snippet** — matching text with highlighted search terms
+- **Session name** — the session this result belongs to
 - **Project name** — right-aligned
 
 Select a result to jump to that session and scroll directly to
@@ -464,10 +508,11 @@ overrides the default first-message title.
 
 ### Trash
 
-Right-click a session in the sidebar and select **Delete** to
-move it to the trash. An undo toast appears briefly to let you
-recover the session immediately. Trashed sessions are hidden
-from all listings and analytics.
+Press `Del` (or `Backspace`) with a session selected, or
+right-click and select **Delete**, to move it to the trash.
+An undo toast appears briefly to let you recover the session
+immediately. Trashed sessions are hidden from all listings
+and analytics.
 
 Click **Trash** in the header navigation to view trashed
 sessions. From the trash page you can restore individual
@@ -564,6 +609,7 @@ Press `?` to see all shortcuts in a modal overlay.
 | `o` | Toggle sort order |
 | `l` | Cycle message layout |
 | `s` | Star / unstar current session |
+| `Del` | Delete / archive selected session |
 | `r` | Trigger sync |
 | `e` | Export session |
 | `p` | Publish to Gist |
@@ -591,7 +637,7 @@ Settings are organized into tabs:
 
 ![Settings remote access section](/screenshots/settings-remote.png)
 
-Changes are persisted to `~/.agentsview/config.json` and
+Changes are persisted to `~/.agentsview/config.toml` and
 survive restarts. See [Remote Access](/remote-access/) for
 details on the remote access settings.
 

@@ -29,24 +29,34 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   <img src="/agents/openclaw.svg" alt="OpenClaw" data-agent="openclaw" width="500" height="65" />
   <img src="/agents/pi.svg" alt="Pi" data-agent="pi" width="400" height="65" />
   <img src="/agents/iflow.svg" alt="iFlow" data-agent="iflow" width="400" height="65" />
+  <img src="/agents/zencoder.svg" alt="Zencoder" data-agent="zencoder" width="500" height="65" />
+  <img src="/agents/kimi.svg" alt="Kimi" data-agent="kimi" width="400" height="65" />
 </div>
 
 ## Quick Start
 
 **Download the desktop app (recommended):**
 
-Download the latest `.dmg` (macOS) or `.exe` (Windows) from
+Download the latest `.dmg` (macOS), `.exe` (Windows), or
+`.AppImage` (Linux) from
 [GitHub Releases](https://github.com/wesm/agentsview/releases).
-The desktop app is fully bundled — no CLI needed — and includes
-built-in auto-update support.
+The desktop app is fully bundled and includes built-in
+auto-update.
 
-**Install via CLI:**
+**Install via pip** — or run instantly with `uvx`:
+
+```bash
+pip install agentsview    # install permanently
+uvx agentsview            # or run without installing
+```
+
+**Install via shell script:**
 
 ```bash
 curl -fsSL https://agentsview.io/install.sh | bash
 ```
 
-**Windows:**
+**Windows (PowerShell):**
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://agentsview.io/install.ps1 | iex"
@@ -66,11 +76,12 @@ fully complementary.
 
 ## What It Does
 
-agentsview reads the session files that Claude Code, Codex,
-Copilot CLI, Cursor, Gemini CLI, OpenCode, Amp, VS Code Copilot,
-OpenClaw, Pi, and iFlow leave on your machine and gives you a
-local-first desktop and web app to work with them. It runs
-locally — nothing leaves your machine.
+agentsview reads the session files that your
+[AI coding agents](/configuration/#session-discovery) leave on
+your machine and gives you a local-first desktop and web app to
+work with them. By default everything stays on your machine.
+Optionally, [PostgreSQL sync](/pg-sync/) can push session data
+to a shared database for team or multi-machine setups.
 
 <CardGrid stagger>
   <Card title="AI-Powered Insights" icon="star">
@@ -102,10 +113,10 @@ locally — nothing leaves your machine.
     in another.
   </Card>
   <Card title="Multi-Agent Support" icon="rocket">
-    Works with Claude Code, Codex, Copilot CLI, Cursor,
-    Gemini CLI, OpenCode, Amp, VS Code Copilot,
-    OpenClaw, Pi, and iFlow. Auto-discovers session
-    directories so there's nothing to configure.
+    Works with [13 AI coding agents](/configuration/#session-discovery)
+    including Claude Code, Codex, Copilot, Cursor,
+    and Gemini. Auto-discovers session directories
+    so there's nothing to configure.
   </Card>
   <Card title="Runs Locally" icon="laptop">
     SQLite database, embedded web frontend, no cloud
