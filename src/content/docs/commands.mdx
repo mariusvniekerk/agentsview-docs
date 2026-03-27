@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: All agentsview commands, flags, and environment variables
+description: All AgentsView commands, flags, and environment variables
 ---
 
 ## Commands
@@ -153,7 +153,7 @@ root sessions usually use UUIDs like
 IDs like `agent-a86574e`, and some other agents use prefixes
 such as `codex:my-session-id`.
 
-If the agentsview server is already running, the command reads the
+If the AgentsView server is already running, the command reads the
 current database state. If no server is running, it performs an
 on-demand sync for the requested session first, then returns the
 stored token totals.
@@ -180,7 +180,7 @@ agentsview token-use 550e8400-e29b-41d4-a716-446655440000
 `total_output_tokens` is the session's total generated output
 tokens. `peak_context_tokens` is the highest context-token count
 seen during that session. `server_running` indicates whether the
-command used an already-running agentsview server rather than
+command used an already-running AgentsView server rather than
 falling back to an on-demand session sync.
 
 ---

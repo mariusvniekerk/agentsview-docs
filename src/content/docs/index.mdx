@@ -1,10 +1,10 @@
 ---
-title: agentsview
+title: AgentsView
 description: Local-first desktop and web app for AI agent sessions
 hero:
   tagline: A local-first desktop and web app for browsing, searching, and analyzing your past AI coding sessions. See what your agents actually did across every project.
   image:
-    html: '<img src="/screenshots/dashboard.png" alt="agentsview analytics dashboard" />'
+    html: '<img src="/screenshots/dashboard.png" alt="AgentsView analytics dashboard" />'
   actions:
     - text: Get Started
       link: /quickstart/
@@ -76,7 +76,7 @@ fully complementary.
 
 ## What It Does
 
-agentsview reads the session files that your
+AgentsView reads the session files that your
 [AI coding agents](/configuration/#session-discovery) leave on
 your machine and gives you a local-first desktop and web app to
 work with them. By default everything stays on your machine.
@@ -109,7 +109,7 @@ to a shared database for team or multi-machine setups.
   <Card title="Live Sync" icon="setting">
     Watches your session directories for changes and
     streams new messages in real time. Start a coding
-    session in one window, watch it appear in agentsview
+    session in one window, watch it appear in AgentsView
     in another.
   </Card>
   <Card title="Multi-Agent Support" icon="rocket">
@@ -127,9 +127,9 @@ to a shared database for team or multi-machine setups.
 
 ## How It Works
 
-<img src="/architecture.svg" alt="agentsview architecture: agent sessions sync into SQLite with FTS5 search, served via REST API, SSE events, and embedded Svelte SPA" style="width: 100%; max-width: 960px; margin: 1.5rem auto; display: block;" />
+<img src="/architecture.svg" alt="AgentsView architecture: agent sessions sync into SQLite with FTS5 search, served via REST API, SSE events, and embedded Svelte SPA" style="width: 100%; max-width: 960px; margin: 1.5rem auto; display: block;" />
 
-agentsview watches your agent session directories for changes,
+AgentsView watches your agent session directories for changes,
 parses JSONL files from each agent format, and stores structured
 data in SQLite with full-text search indexes. The embedded web
 frontend provides browsing, search, and analytics over the

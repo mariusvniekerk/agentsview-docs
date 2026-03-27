@@ -5,7 +5,7 @@ export default defineConfig({
   site: 'https://agentsview.io',
   integrations: [
     starlight({
-      title: 'agentsview',
+      title: 'AgentsView',
       disable404Route: false,
       components: {
         ThemeSelect: './src/components/EmptyThemeSelect.astro',
@@ -35,6 +35,48 @@ export default defineConfig({
           attrs: {
             property: 'og:type',
             content: 'website',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:site_name',
+            content: 'AgentsView',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:image',
+            content: 'https://agentsview.io/og-image.png',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:image:width',
+            content: '1200',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            property: 'og:image:height',
+            content: '630',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:card',
+            content: 'summary_large_image',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'twitter:image',
+            content: 'https://agentsview.io/og-image.png',
           },
         },
       ],

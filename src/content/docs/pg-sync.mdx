@@ -3,7 +3,7 @@ title: PostgreSQL Sync
 description: Share sessions across machines with PostgreSQL push sync and a read-only server
 ---
 
-agentsview stores sessions locally in SQLite by default. PostgreSQL
+AgentsView stores sessions locally in SQLite by default. PostgreSQL
 sync lets you push sessions from one or more machines into a shared
 PostgreSQL database, then serve a read-only web UI from it — useful
 for team dashboards or multi-machine setups.
@@ -281,6 +281,6 @@ agentsview pg serve \
   SQL DELETE to clean up PostgreSQL if needed. Soft-deleted
   sessions (trash) sync correctly.
 - **Schema compatibility** — `pg serve` checks that the
-  PostgreSQL schema version matches the agentsview version.
+  PostgreSQL schema version matches the AgentsView version.
   After upgrading, run `agentsview pg push -full` to update
   the schema.

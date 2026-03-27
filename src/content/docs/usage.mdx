@@ -1,17 +1,17 @@
 ---
 title: Usage Guide
-description: Complete guide to the agentsview web interface
+description: Complete guide to the AgentsView web interface
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-agentsview serves a full-featured web application for browsing,
+AgentsView serves a full-featured web application for browsing,
 searching, and analyzing your AI agent sessions. This page walks
 through every part of the interface.
 
 ## Dashboard
 
-When you open agentsview with no session selected, you see the
+When you open AgentsView with no session selected, you see the
 analytics dashboard. It provides a high-level overview of your
 agent activity across all projects.
 
@@ -152,7 +152,7 @@ projects, tools, and velocity sections.
 
 ## Session Insights
 
-agentsview can generate AI-powered summaries and analysis of your
+AgentsView can generate AI-powered summaries and analysis of your
 coding sessions using Claude, Codex, or Gemini. Click **Insights**
 in the header navigation bar to open the Insights page, where you
 can generate daily activity digests, multi-day summaries, and
@@ -211,7 +211,7 @@ workflows easier to navigate without leaving the session list.
 
 ### Forks and Subagent Sessions
 
-agentsview automatically detects conversation forks in Claude
+AgentsView automatically detects conversation forks in Claude
 Code sessions — for example, when you use "retry from here" to
 branch a conversation. Large forks (more than 3 user turns)
 appear as separate session entries grouped with their parent.
@@ -439,7 +439,7 @@ scroll up. Smaller sessions load all messages at once.
 
 ### Live Updates
 
-When viewing an active session, agentsview uses Server-Sent
+When viewing an active session, AgentsView uses Server-Sent
 Events to stream new messages in real time. The message list
 updates incrementally — only new activity is fetched, rather
 than reloading the entire session — so updates arrive faster
@@ -675,7 +675,7 @@ preference is saved and persists across sessions.
 
 ### Iframe Embedding
 
-When embedding agentsview in an iframe, the parent page can
+When embedding AgentsView in an iframe, the parent page can
 control the theme via `postMessage`:
 
 ```javascript
@@ -691,7 +691,7 @@ Accepted values for `theme` are `"light"` and `"dark"`.
 
 ## Sync
 
-agentsview automatically syncs session files on startup and
+AgentsView automatically syncs session files on startup and
 watches for changes in real time. The sync status is shown in
 the status bar:
 
@@ -713,7 +713,7 @@ Click the **gear icon** in the header to open the Full Resync
 modal. This re-parses all session files from scratch using a
 non-destructive flow — existing session data is preserved and
 orphaned sessions (those no longer present on disk) are carried
-forward. This is useful after upgrading agentsview or when
+forward. This is useful after upgrading AgentsView or when
 sessions appear to be parsed incorrectly.
 
 The modal shows live progress as sessions are processed:

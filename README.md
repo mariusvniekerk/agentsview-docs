@@ -1,6 +1,6 @@
 # agentsview-docs
 
-Documentation site for [agentsview](https://agentsview.io).
+Documentation site for [AgentsView](https://agentsview.io).
 
 Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
 
