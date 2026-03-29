@@ -137,6 +137,14 @@ The server is read-only — uploads, file watching, and local
 sync are all disabled. Sessions from all machines appear in
 a single unified view.
 
+On startup, `pg serve` automatically applies any pending
+schema migrations to PostgreSQL, creating new tables and
+indexes added in newer AgentsView versions. This removes
+the need to run `pg push` before starting the server after
+an upgrade. If the PostgreSQL role is read-only, the
+migration is skipped and the server falls back to the
+schema compatibility check.
+
 When binding to a non-loopback address, auth is enabled
 automatically. A bearer token is generated and printed on
 startup. Pass it via `Authorization: Bearer <token>` header.
@@ -280,7 +288,7 @@ agentsview pg serve \
   the local rows no longer exist at push time. Use a direct
   SQL DELETE to clean up PostgreSQL if needed. Soft-deleted
   sessions (trash) sync correctly.
-- **Schema compatibility** — `pg serve` checks that the
-  PostgreSQL schema version matches the AgentsView version.
-  After upgrading, run `agentsview pg push -full` to update
-  the schema.
+- **Schema compatibility** — `pg serve` automatically applies
+  pending schema migrations on startup. If the PostgreSQL role
+  lacks DDL permissions, run `agentsview pg push` from a
+  machine with write access to update the schema.

@@ -3,6 +3,35 @@ title: Changelog
 description: Release history for AgentsView
 ---
 
+## 0.17.1
+<small>2026-03-29</small>
+
+**Bug fixes**
+
+- `pg serve` automatically applies pending PostgreSQL schema migrations on startup, reducing upgrade friction and startup failures.
+
+---
+
+## 0.17.0
+<small>2026-03-28</small>
+
+**New features**
+
+- Add a session activity minimap with click-to-navigate support for quickly jumping to activity hotspots within a session.
+- Add a resizable session sidebar so you can drag the divider to adjust the layout to fit your workflow.
+- Capture and display Codex subagent result events in session transcripts, with an expandable history of status updates per tool call.
+
+**Improvements**
+
+- Support Cursor's nested transcript directory layout for more reliable transcript discovery.
+
+**Bug fixes**
+
+- Restore Copilot as an insight-generation agent alongside Claude, Codex, and Gemini.
+- Fix transcript strip pill spacing in WebKit browsers.
+
+---
+
 ## 0.16.2
 <small>2026-03-25</small>
 

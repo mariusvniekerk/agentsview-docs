@@ -991,3 +991,30 @@ test.describe('Model info', () => {
     });
   });
 });
+
+// ── Activity minimap ────────────────────────────────────
+
+test.describe('Activity minimap', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await selectRichSession(page);
+  });
+
+  test('activity minimap open', async ({ page }) => {
+    // Open the minimap via the toggle button in the breadcrumb
+    const minimapBtn = page.locator(
+      'button[aria-label="Toggle activity minimap"]'
+    );
+    await expect(minimapBtn).toBeVisible({ timeout: 5_000 });
+    await minimapBtn.click();
+    await page.waitForTimeout(1500);
+
+    const minimap = page.locator('.activity-minimap');
+    await expect(minimap).toBeVisible({ timeout: 5_000 });
+    await snap(page, 'activity-minimap');
+
+    // Close the minimap to clean up
+    await minimapBtn.click();
+  });
+});
