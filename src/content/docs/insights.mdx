@@ -4,8 +4,8 @@ description: AI-powered analysis of your agent coding sessions
 ---
 
 AgentsView can generate AI-powered summaries and analysis of your
-coding sessions using Claude, Codex, or Gemini. Insights run
-locally — your session data is sent to the AI agent running on
+coding sessions using Claude, Codex, Copilot, or Gemini. Insights
+run locally — your session data is sent to the AI agent running on
 your machine, and the generated markdown is stored in your local
 database.
 
@@ -50,7 +50,7 @@ Choose **Daily Activity**, **Date Range Activity**, or
 - **Project** — scope the insight to a specific project, or
   leave on "All Projects" for a global view.
 - **Agent** — choose which AI agent generates the insight:
-  Claude, Codex, or Gemini. Defaults to Claude.
+  Claude, Codex, Copilot, or Gemini. Defaults to Claude.
 
 ### 3. Add Context (Optional)
 
@@ -114,7 +114,8 @@ When you click Generate:
    projects, agents, timestamps, message counts, and first
    message previews.
 3. The prompt is sent to the selected agent CLI (`claude -p`,
-   `codex exec`, or `gemini`) running locally on your machine.
+   `codex exec`, `copilot -p`, or `gemini`) running locally on
+   your machine.
 4. The response streams back via Server-Sent Events, showing
    progress in the sidebar task list.
 5. The completed insight is saved to the database and displayed

@@ -153,7 +153,7 @@ projects, tools, and velocity sections.
 ## Session Insights
 
 AgentsView can generate AI-powered summaries and analysis of your
-coding sessions using Claude, Codex, or Gemini. Click **Insights**
+coding sessions using Claude, Codex, Copilot, or Gemini. Click **Insights**
 in the header navigation bar to open the Insights page, where you
 can generate daily activity digests, multi-day summaries, and
 deeper analyses of your agent workflow patterns — scoped by
@@ -167,7 +167,12 @@ documentation.
 ## Session Browser
 
 The left sidebar lists all sessions with virtual scrolling for
-smooth performance even with thousands of sessions.
+smooth performance even with thousands of sessions. On desktop,
+drag the resize handle between the sidebar and the content pane
+to adjust the sidebar width. The width is constrained between
+220px and 520px, always leaving at least 480px for the content
+area. Your preferred width is saved in localStorage and restored
+on next visit.
 
 ![Session list](/screenshots/session-list.png)
 
@@ -358,6 +363,13 @@ Codex tool calls receive special formatting: bash commands,
 write_stdin operations, and apply_patch calls display with
 structured argument previews and categorized detail labels.
 
+When a Codex tool call has subagent result events — status
+updates captured during execution — an expandable **history**
+section appears below the tool output. Click it to see the
+full chronological timeline of status changes (e.g. "wait",
+"completed", "failed") with source and content for each
+event. The latest event summary is shown by default.
+
 ### Subagent Linking
 
 When a Task or Agent tool block is linked to a subagent
@@ -430,6 +442,25 @@ gives a quick view of how much context the agent consumed
 and how much it generated.
 
 ![Token usage display](/screenshots/token-usage.png)
+
+### Activity Minimap
+
+Click the minimap button in the session header to open a
+horizontal bar chart showing message activity across the
+session timeline. Each bar represents a time bucket with
+user and assistant message counts — taller bars indicate
+more activity.
+
+![Activity minimap](/screenshots/activity-minimap.png)
+
+Click any bar to jump directly to the first message in
+that time interval. An active indicator tracks your
+current scroll position within the session. The minimap
+adapts its bucket count to the session length, targeting
+around 30 bars for a readable overview.
+
+Hover over a bar to see the exact time range and message
+counts. The minimap preference is saved in localStorage.
 
 ### Progressive Loading
 
