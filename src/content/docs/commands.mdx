@@ -224,6 +224,34 @@ plus PostgreSQL configuration from `config.toml`.
 
 ---
 
+### `agentsview import`
+
+Import Claude.ai or ChatGPT conversations into the local
+database. See [Chat Import](/chat-import/) for full
+documentation.
+
+```bash
+agentsview import --type <type> <path>
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--type` | | Import type: `claude-ai` or `chatgpt` (required) |
+
+The path can be a `.zip` file, a `conversations.json` file
+(Claude.ai only), or a directory containing the extracted
+export.
+
+**Examples:**
+
+```bash
+agentsview import --type claude-ai ~/Downloads/claude.zip
+agentsview import --type chatgpt ~/Downloads/chatgpt.zip
+agentsview import --type claude-ai ./conversations.json
+```
+
+---
+
 ### `agentsview help`
 
 Print usage information.

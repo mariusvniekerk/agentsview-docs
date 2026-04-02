@@ -992,6 +992,68 @@ test.describe('Model info', () => {
   });
 });
 
+// ── Import conversations ────────────────────────────────
+
+test.describe('Import conversations', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  test('import button in header', async ({ page }) => {
+    const importBtn = page.locator(
+      'button[title="Import conversations"]'
+    );
+    await expect(importBtn).toBeVisible({ timeout: 5_000 });
+
+    // Capture a region around the button for context — snap
+    // the header-right section that contains it.
+    const headerRight = page.locator('.header-right');
+    if (await headerRight.count() > 0) {
+      await snapEl(headerRight, 'import-button');
+    } else {
+      await snapEl(importBtn, 'import-button');
+    }
+  });
+
+  test('import modal claude-ai', async ({ page }) => {
+    const importBtn = page.locator(
+      'button[title="Import conversations"]'
+    );
+    await expect(importBtn).toBeVisible({ timeout: 5_000 });
+    await importBtn.click();
+
+    const modal = page.locator('div[role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5_000 });
+    await page.waitForTimeout(300);
+
+    // Claude.ai is the default provider
+    await snapEl(modal, 'import-modal-claude');
+
+    await page.keyboard.press('Escape');
+  });
+
+  test('import modal chatgpt', async ({ page }) => {
+    const importBtn = page.locator(
+      'button[title="Import conversations"]'
+    );
+    await expect(importBtn).toBeVisible({ timeout: 5_000 });
+    await importBtn.click();
+
+    const modal = page.locator('div[role="dialog"]');
+    await expect(modal).toBeVisible({ timeout: 5_000 });
+    await page.waitForTimeout(300);
+
+    // Select ChatGPT provider via its label
+    await modal.getByText('ChatGPT').click();
+    await page.waitForTimeout(300);
+
+    await snapEl(modal, 'import-modal-chatgpt');
+
+    await page.keyboard.press('Escape');
+  });
+});
+
 // ── Activity minimap ────────────────────────────────────
 
 test.describe('Activity minimap', () => {
