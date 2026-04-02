@@ -3,6 +3,25 @@ title: Changelog
 description: Release history for AgentsView
 ---
 
+## 0.18.0
+<small>2026-04-02</small>
+
+**New features**
+
+- Import [Claude.ai and ChatGPT conversations](/chat-import/) into AgentsView. Upload the zip file export from either service via the UI or CLI to bring your full conversation history — including ChatGPT images — into your local database alongside your agent coding sessions.
+- Show token usage metrics across sessions, analytics views, and exports. Session breadcrumbs display peak context and output tokens, the analytics dashboard includes output token summary cards and heatmap metrics, and CSV exports include token totals.
+
+**Improvements**
+
+- Detect automated roborev sessions and filter them out of session lists, counts, and analytics by default. An "Include automated" toggle in the session filter dropdown opts back in.
+
+**Bug fixes**
+
+- Keep pinned messages pinned after a session resync. Previously, re-syncing a session's messages could silently remove all pins due to cascade deletes; pins are now preserved by matching on message ordinal.
+- Reduce WebView memory usage when rendering message content by rekeying content-parser caches on message ID instead of full message text and lowering cache capacity.
+
+---
+
 ## 0.17.1
 <small>2026-03-29</small>
 
