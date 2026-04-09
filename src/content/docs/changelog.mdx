@@ -3,6 +3,29 @@ title: Changelog
 description: Release history for AgentsView
 ---
 
+## 0.19.0
+<small>2026-04-08</small>
+
+**New features**
+
+- Add Warp agent session support, reading AI conversations from Warp's local SQLite database with tool call breakdowns and token usage.
+- Add Hermes Agent session support across CLI, Discord, webhook, and cron platforms, with per-platform project grouping and skill prefix handling.
+- Add Cortex Code session support for Snowflake's AI coding agent, parsing both embedded-history and split-file formats.
+- Add Kiro CLI and Kiro IDE session support for Amazon's AI coding assistant, including unified diff rendering for edit actions.
+- Add Cursor session history with resume (`cursor agent --resume`) and automatic workspace recovery via `--workspace`.
+- Add the ability to resume Claude sessions in Claude Desktop via the session resume menu (macOS).
+
+**Improvements**
+
+- Add [project filtering](/pg-sync/#project-filtering) to `pg push` with `-projects`, `-exclude-projects`, and `-all-projects` flags plus config file equivalents. A new [`agentsview projects`](/commands/#agentsview-projects) command lists all projects with session counts.
+- Add an opt-out for the update check via `disable_update_check` in config, `AGENTSVIEW_DISABLE_UPDATE_CHECK=1` environment variable, or `-no-update-check` CLI flag.
+
+**Bug fixes**
+
+- Fix the synced status label staying stale after a sync completes. The relative time now refreshes every 10 seconds, and hovering shows the exact sync timestamp.
+
+---
+
 ## 0.18.0
 <small>2026-04-02</small>
 

@@ -55,12 +55,15 @@ entirely by PostgreSQL. No local SQLite, file watching, or uploads
 Sync sessions from the local SQLite database to PostgreSQL.
 
 ```bash
-agentsview pg push [-full]
+agentsview pg push [flags]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `-full` | `false` | Force full local resync and re-push, bypassing change detection |
+| `-projects` | | Comma-separated projects to push (inclusive) |
+| `-exclude-projects` | | Comma-separated projects to exclude |
+| `-all-projects` | `false` | Ignore configured project filters for this run |
 
 Push is on-demand — run it whenever you want to sync. There is
 no automatic background push.
@@ -85,6 +88,47 @@ content was rewritten in place.
 If any sessions fail to push, the watermark is not advanced so
 they are retried on the next run. The exit code is 1 when any
 errors occur, 0 otherwise.
+
+#### Project Filtering
+
+By default, `pg push` syncs all projects. Use project filters
+to push a subset:
+
+```bash
+# Push only these projects
+agentsview pg push -projects alpha,beta
+
+# Push everything except this project
+agentsview pg push -exclude-projects scratch
+
+# Ignore config-file filters for this run
+agentsview pg push -all-projects
+```
+
+`-projects` and `-exclude-projects` are mutually exclusive.
+`-all-projects` cannot be combined with either.
+
+Project filters can also be set in `config.toml` so you don't
+need to pass them on every run:
+
+```toml
+[pg]
+url = "postgres://..."
+projects = ["alpha", "beta"]
+# or: exclude_projects = ["scratch"]
+```
+
+CLI flags override config values. Use
+[`agentsview projects`](/commands/#agentsview-projects) to list
+available project names.
+
+:::caution
+Filtered pushes do not advance the global push watermark
+because it covers all projects. This means the query window
+for subsequent filtered pushes grows over time. Run an
+unfiltered `pg push` (or `pg push -all-projects`)
+periodically to reset the watermark.
+:::
 
 ### `agentsview pg status`
 
@@ -218,6 +262,8 @@ allow_insecure = false
 | `machine_name` | OS hostname | Identifies the pushing machine; defaults to `os.Hostname()` if omitted |
 | `schema` | `agentsview` | PostgreSQL schema name |
 | `allow_insecure` | `false` | Allow non-TLS connections to non-loopback hosts |
+| `projects` | | Array of project names to include in push |
+| `exclude_projects` | | Array of project names to exclude from push |
 
 :::caution
 The `url` field is required for all `pg` commands. If it
