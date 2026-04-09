@@ -142,7 +142,7 @@ The corresponding fields are `claude_project_dirs`,
 `codex_sessions_dirs`, `copilot_dirs`,
 `cursor_project_dirs`, `gemini_dirs`, `opencode_dirs`,
 `amp_dirs`, `vscode_copilot_dirs`, `openclaw_dirs`,
-`iflow_dirs`, `zencoder_dirs`, `kimi_dirs`,
+`pi_dirs`, `iflow_dirs`, `zencoder_dirs`, `kimi_dirs`,
 `warp_dirs`, `hermes_sessions_dirs`, `cortex_dirs`,
 `kiro_dirs`, and `kiro_ide_dirs`.
 Each accepts an array of paths. When set, these take precedence
@@ -222,8 +222,19 @@ curl http://127.0.0.1:8080/api/v1/sync/status
 ## Privacy and Telemetry
 
 AgentsView has no telemetry, analytics, crash reporting, or
-diagnostics. All session data stays on your local machine in
-SQLite.
+diagnostics. By default, all session data stays on your local
+machine in SQLite.
+
+Optional features that send data externally when you enable
+them:
+
+- [PostgreSQL sync](/pg-sync/) (`pg push`) sends session data
+  to a PostgreSQL database you configure.
+- [Session Insights](/insights/) sends session content to an
+  AI provider (Claude, Codex, Copilot, or Gemini) to generate
+  summaries.
+- [Publish to Gist](/usage/#publish-to-gist) uploads a session
+  to GitHub.
 
 The only automatic outbound requests are update checks:
 
