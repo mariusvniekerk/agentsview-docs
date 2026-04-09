@@ -42,6 +42,7 @@ github_token = "ghp_xxxxx"
 | `public_url` | Public URL for hostname/proxy access and origin validation |
 | `public_origins` | Array of additional trusted CORS origins |
 | `[proxy]` | Managed proxy configuration table — see [Remote Access](/remote-access/) |
+| `disable_update_check` | Disable the automatic update check (see [Privacy](#privacy-and-telemetry)) |
 | `[pg]` | PostgreSQL sync configuration — see [PostgreSQL Sync](/pg-sync/) |
 
 The `cursor_secret` is generated automatically on first run.
@@ -52,7 +53,7 @@ see [Remote Access](/remote-access/) for details.
 
 ## Session Discovery
 
-AgentsView auto-discovers session files from thirteen agent types:
+AgentsView auto-discovers session files from eighteen agent types:
 
 | Agent | Default Directory | File Format |
 |-------|-------------------|-------------|
@@ -69,6 +70,11 @@ AgentsView auto-discovers session files from thirteen agent types:
 | iFlow | `~/.iflow/projects/` | JSONL per session |
 | Zencoder | `~/.zencoder/sessions/` | JSONL per session |
 | Kimi | `~/.kimi/sessions/` | JSONL per session |
+| Warp | (platform-specific, see below) | SQLite database |
+| Hermes Agent | `~/.hermes/sessions/` | JSONL / JSON per session |
+| Cortex Code | `~/.snowflake/cortex/conversations/` | JSON / JSONL per session |
+| Kiro CLI | `~/.kiro/sessions/cli/` | JSONL per session |
+| Kiro IDE | (platform-specific, see below) | JSON / chat files |
 
 **VS Code Copilot default directories** vary by platform:
 
@@ -78,6 +84,18 @@ AgentsView auto-discovers session files from thirteen agent types:
 
 Code Insiders and VSCodium variants are also discovered
 automatically.
+
+**Warp default directories** vary by platform:
+
+- **macOS:** `~/Library/Group Containers/2BBY89MBSN.dev.warp/Library/Application Support/dev.warp.Warp-Stable/`
+- **Linux:** `~/.local/state/warp-terminal/`
+- **Windows:** `~/AppData/Local/warp/Warp/data/`
+
+**Kiro IDE default directories** vary by platform:
+
+- **macOS:** `~/Library/Application Support/Kiro/User/globalStorage/kiro.kiroagent/`
+- **Linux:** `~/.config/Kiro/User/globalStorage/kiro.kiroagent/`
+- **Windows:** `~/AppData/Roaming/Kiro/User/globalStorage/kiro.kiroagent/`
 
 Override any default with an environment variable (single
 directory):
@@ -96,6 +114,11 @@ export PI_DIR=~/custom/pi
 export IFLOW_DIR=~/custom/iflow
 export ZENCODER_DIR=~/custom/zencoder
 export KIMI_DIR=~/custom/kimi
+export WARP_DIR=~/custom/warp
+export HERMES_SESSIONS_DIR=~/custom/hermes
+export CORTEX_DIR=~/custom/cortex
+export KIRO_SESSIONS_DIR=~/custom/kiro
+export KIRO_IDE_DIR=~/custom/kiro-ide
 ```
 
 ### Multiple Directories
@@ -119,7 +142,9 @@ The corresponding fields are `claude_project_dirs`,
 `codex_sessions_dirs`, `copilot_dirs`,
 `cursor_project_dirs`, `gemini_dirs`, `opencode_dirs`,
 `amp_dirs`, `vscode_copilot_dirs`, `openclaw_dirs`,
-`iflow_dirs`, `zencoder_dirs`, and `kimi_dirs`.
+`iflow_dirs`, `zencoder_dirs`, `kimi_dirs`,
+`warp_dirs`, `hermes_sessions_dirs`, `cortex_dirs`,
+`kiro_dirs`, and `kiro_ide_dirs`.
 Each accepts an array of paths. When set, these take precedence
 over the single-directory environment variable and the default
 path.
@@ -193,3 +218,31 @@ Check sync status:
 ```bash
 curl http://127.0.0.1:8080/api/v1/sync/status
 ```
+
+## Privacy and Telemetry
+
+AgentsView has no telemetry, analytics, crash reporting, or
+diagnostics. All session data stays on your local machine in
+SQLite.
+
+The only automatic outbound requests are update checks:
+
+- **CLI and web UI** — on startup, the server contacts the
+  GitHub API to check for new releases. No identifying
+  information is sent beyond what a standard GitHub API
+  request includes (IP address, user-agent).
+- **Desktop app** — uses Tauri's native updater, which
+  checks the GitHub release feed independently.
+
+### Disabling Update Checks
+
+Disable the CLI/web UI update check with any of:
+
+| Method | Value |
+|--------|-------|
+| Config file | `disable_update_check = true` in `~/.agentsview/config.toml` |
+| Environment variable | `AGENTSVIEW_DISABLE_UPDATE_CHECK=1` |
+| CLI flag | `-no-update-check` |
+
+The desktop app's auto-updater is controlled separately via
+`AGENTSVIEW_DESKTOP_AUTOUPDATE=0`.

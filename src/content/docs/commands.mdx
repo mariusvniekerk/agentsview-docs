@@ -19,6 +19,7 @@ agentsview serve [flags]
 | `-host` | `127.0.0.1` | Host to bind to |
 | `-port` | `8080` | Port to listen on |
 | `-browser` | `false` | Open browser on startup |
+| `-no-update-check` | `false` | Disable the update check API endpoint |
 | `-public-url` | | Public URL for hostname or proxy access |
 | `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
 | `-proxy` | | Managed proxy mode (`caddy`) |
@@ -191,12 +192,18 @@ Sync sessions from local SQLite to PostgreSQL. See
 [PostgreSQL Sync](/pg-sync/) for full documentation.
 
 ```bash
-agentsview pg push [-full]
+agentsview pg push [flags]
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `-full` | `false` | Force full local resync and re-push |
+| `-projects` | | Comma-separated projects to push (inclusive) |
+| `-exclude-projects` | | Comma-separated projects to exclude from push |
+| `-all-projects` | `false` | Ignore configured project filters for this run |
+
+See [PostgreSQL Sync — Project Filtering](/pg-sync/#project-filtering)
+for details on how filtering interacts with the push watermark.
 
 ---
 
@@ -221,6 +228,27 @@ agentsview pg serve [flags]
 
 Accepts the same serve flags (`-host`, `-port`, `-proxy`, etc.)
 plus PostgreSQL configuration from `config.toml`.
+
+---
+
+### `agentsview projects`
+
+List all projects in the local database with their session counts.
+
+```bash
+agentsview projects [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `-json` | `false` | Output as a JSON array |
+
+**Examples:**
+
+```bash
+agentsview projects          # tabular output
+agentsview projects -json    # JSON array
+```
 
 ---
 
@@ -277,10 +305,16 @@ agentsview help
 | `IFLOW_DIR` | `~/.iflow/projects` | iFlow projects directory |
 | `ZENCODER_DIR` | `~/.zencoder/sessions` | Zencoder sessions directory |
 | `KIMI_DIR` | `~/.kimi/sessions` | Kimi sessions directory |
+| `WARP_DIR` | (platform-specific) | Warp database directory |
+| `HERMES_SESSIONS_DIR` | `~/.hermes/sessions` | Hermes Agent sessions directory |
+| `CORTEX_DIR` | `~/.snowflake/cortex/conversations` | Cortex Code conversations directory |
+| `KIRO_SESSIONS_DIR` | `~/.kiro/sessions/cli` | Kiro CLI sessions directory |
+| `KIRO_IDE_DIR` | (platform-specific) | Kiro IDE sessions directory |
 | `AGENT_VIEWER_DATA_DIR` | `~/.agentsview` | Data directory (database, config) |
 | `AGENTSVIEW_PG_URL` | | PostgreSQL connection URL |
 | `AGENTSVIEW_PG_MACHINE` | | Machine name for PG push sync |
 | `AGENTSVIEW_PG_SCHEMA` | `agentsview` | PostgreSQL schema name |
+| `AGENTSVIEW_DISABLE_UPDATE_CHECK` | | Set to `1` to disable the update check |
 
 Environment variables override the built-in defaults. Set them
 in your shell profile or pass them inline:

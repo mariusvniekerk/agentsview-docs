@@ -575,9 +575,15 @@ with three resume actions:
 - **Open Directory** — open the session's working directory in
   Finder (macOS) or Explorer (Windows)
 
-GitHub Copilot CLI sessions also appear in the resume
-dropdown, so you can reopen them directly from the session
-list.
+GitHub Copilot CLI and Cursor sessions also appear in the
+resume dropdown. Cursor resume resolves the original workspace
+path automatically and passes it as `--workspace` to
+`cursor agent --resume`.
+
+For Claude sessions on macOS, a **Claude Desktop** option
+appears at the bottom of the resume menu. It opens the session
+in Claude Desktop's Code tab via the `claude://resume` URL
+scheme.
 
 These actions let you quickly pick up where you left off
 without manually navigating to the project directory.
@@ -731,6 +737,8 @@ the status bar:
 - **Syncing indicator** — green text showing progress percentage
   and phase ("Scanning [project]..." or parse progress)
 - **Last sync time** — relative timestamp ("synced 2h ago")
+  that updates automatically. Hover to see the exact sync
+  timestamp.
 
 Press `r` to trigger a manual sync. The sync button in the
 header shows a spinning animation while syncing.
