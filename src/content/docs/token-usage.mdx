@@ -22,17 +22,18 @@ invocation, it's also dramatically faster on large histories
 (see [benchmarks](#how-it-compares-to-ccusage) below).
 
 :::note
-**Agent coverage in 0.20.0**: usage reports are populated for
+**Agent coverage in 0.20.0**: usage totals are driven by
 **Claude Code** and **Codex** sessions. Other supported agents
-show up in the session browser and analytics but do not yet
-contribute to `agentsview usage` totals — their parsers either
-don't record per-message token counts (VS Code Copilot, Positron
-Assistant, Copilot CLI, OpenHands, OpenCode, Amp, and most
-others) or only record session-level totals that this command
-doesn't aggregate (Warp). Gemini CLI stores a `tokens` blob but
-with field names that differ from what the cost scanner reads,
-so Gemini sessions don't produce meaningful totals here either.
-Expanding coverage is ongoing work.
+still appear in the session browser and analytics, but do not
+yet contribute cost rows to `agentsview usage` — their parsers
+either don't record per-message token counts (VS Code Copilot,
+Positron Assistant, Copilot CLI, OpenHands, OpenCode, Amp, and
+most others) or only record session-level totals that this
+command doesn't aggregate (Warp). Gemini CLI writes a `tokens`
+blob with field names that differ from what the cost scanner
+reads, so Gemini models may appear in each day's models-used
+list but contribute zero tokens and zero cost until the parser
+or scanner is updated. Expanding coverage is ongoing work.
 :::
 
 ## Quick Tour
