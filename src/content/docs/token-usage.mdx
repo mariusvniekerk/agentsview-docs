@@ -335,10 +335,16 @@ agentsview usage daily \
 
 **Per-agent totals for the last 7 days:**
 
+`date` arithmetic differs between BSD (macOS) and GNU (Linux),
+so the snippet tries the BSD form first and falls back to GNU:
+
 ```bash
+since=$(date -v-7d +%Y-%m-%d 2>/dev/null \
+  || date -d '7 days ago' +%Y-%m-%d)
+
 for a in claude codex copilot gemini; do
   total=$(agentsview usage daily \
-    --since "$(date -v-7d +%Y-%m-%d)" \
+    --since "$since" \
     --agent "$a" \
     --json 2>/dev/null \
     | jq '.totals.totalCost')
@@ -348,12 +354,17 @@ done
 
 **Alert when today crosses a budget:**
 
+The script writes to stderr and exits non-zero so you can wire
+it into whatever notifier fits your OS — cron's `MAILTO`,
+launchd's `StandardErrorPath`, a systemd timer's journal, or a
+Windows Task Scheduler action:
+
 ```bash
 today=$(agentsview usage statusline --offline --no-sync \
   | tr -dc '0-9.')
 if awk -v t="$today" 'BEGIN {exit !(t+0 > 25)}'; then
-  osascript -e 'display notification "AI spend > $25 today" \
-    with title "AgentsView"'
+  echo "AgentsView: AI spend \$$today today (> \$25)" >&2
+  exit 1
 fi
 ```
 
