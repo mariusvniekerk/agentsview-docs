@@ -5,20 +5,35 @@ description: Fast token usage and cost reports from your local AgentsView databa
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-AgentsView ingests the raw `token_usage` blobs from every
-supported agent's session files, so the database already knows
-every input, output, cache-creation, and cache-read token your
-agents have logged. The `agentsview usage` commands turn that
-into daily cost reports and a one-line today's-spend summary —
-without re-reading any JSONL files.
+AgentsView's Claude Code and Codex parsers record the raw
+`token_usage` blob on every message they ingest, so the database
+already knows every input, output, cache-creation, and
+cache-read token those agents have logged. The `agentsview
+usage` commands turn that into daily cost reports and a one-line
+today's-spend summary — without re-reading any JSONL files.
 
 If you've used [`ccusage`](https://github.com/ryoppippi/ccusage)
 this will feel familiar. AgentsView covers the same core job —
-"how much did I spend on AI coding yesterday?" — for every agent
-AgentsView supports, not just Claude Code. Because it reads from
+"how much did I spend on AI coding yesterday?" — for Claude Code
+and Codex today, with more agents coming as their parsers start
+emitting per-message token usage. Because it reads from
 pre-indexed SQLite instead of re-parsing JSONL on every
 invocation, it's also dramatically faster on large histories
 (see [benchmarks](#how-it-compares-to-ccusage) below).
+
+:::note
+**Agent coverage in 0.20.0**: usage reports are populated for
+**Claude Code** and **Codex** sessions. Other supported agents
+show up in the session browser and analytics but do not yet
+contribute to `agentsview usage` totals — their parsers either
+don't record per-message token counts (VS Code Copilot, Positron
+Assistant, Copilot CLI, OpenHands, OpenCode, Amp, and most
+others) or only record session-level totals that this command
+doesn't aggregate (Warp). Gemini CLI stores a `tokens` blob but
+with field names that differ from what the cost scanner reads,
+so Gemini sessions don't produce meaningful totals here either.
+Expanding coverage is ongoing work.
+:::
 
 ## Quick Tour
 
@@ -32,22 +47,32 @@ agentsview usage daily --all --breakdown
 # JSON output for scripting
 agentsview usage daily --json > spend.json
 
+```
+
+Examples:
+
+```
+> agentsview usage daily --since 2026-04-01
+DATE        INPUT      OUTPUT    CACHE_CR   CACHE_RD    COST        MODELS
+----        -----      ------    --------   --------    ----        ------
+2026-04-01  77116868   2220604   39278251   887929665   $867.5794   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001, claude-sonnet-4-6, gemini-3.1-pro-preview
+2026-04-02  39512998   2052183   32282358   669276138   $639.0390   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6, claude-haiku-4-5-20251001
+2026-04-03  44691255   1546401   28098708   429185669   $505.4604   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6, claude-haiku-4-5-20251001
+2026-04-04  46934657   1325888   14553015   414338356   $395.3920   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6, claude-haiku-4-5-20251001, gpt-5.4-mini, gemini-3.1-pro-preview
+2026-04-05  25170256   1941103   30847323   561656999   $528.7120   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6, claude-haiku-4-5-20251001, gemini-3.1-pro-preview
+2026-04-06  31754752   2229449   35744879   819607019   $737.4766   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001, gemini-3.1-pro-preview
+2026-04-07  8892030    845077    13634936   320512173   $267.4140   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6, claude-haiku-4-5-20251001, gemini-3.1-pro-preview
+2026-04-08  31293887   1544001   20655222   342488168   $382.1367   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001, claude-sonnet-4-6, gemini-3.1-pro-preview
+2026-04-09  13727647   993999    15882703   365800542   $319.4668   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001
+2026-04-10  31267328   1733973   23694161   457175785   $460.5217   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001, claude-sonnet-4-6
+2026-04-11  15380652   1346181   27087393   614828847   $522.8961   claude-opus-4-6, gpt-5.4, claude-haiku-4-5-20251001
+2026-04-12  3633802    871157    7123679    231912052   $188.7764   claude-opus-4-6, gpt-5.4, claude-sonnet-4-6
+----        -----      ------    --------   --------    ----        ------
+TOTAL       369376132  18650016  288882628  6114711413  $5814.8710
+
 # One-line today's spend (for prompt or tmux status line)
-agentsview usage statusline
-```
-
-```
-DATE        INPUT   OUTPUT  CACHE_CR  CACHE_RD  COST      MODELS
-----        -----   ------  --------  --------  ----      ------
-2026-04-10  52130   184250  412008    3821044   $12.8431  claude-opus-4-6, gpt-5.1
-2026-04-11  48910   201320  458902    4102887   $14.0217  claude-opus-4-6
-2026-04-12  33410   142805  301223    2984511   $9.6052   claude-opus-4-6, gpt-5.1
-----        -----   ------  --------  --------  ----      ------
-TOTAL       134450  528375  1172133   10908442  $36.4700
-```
-
-```
-$9.61 today
+> agentsview usage statusline
+$195.64 today
 ```
 
 The daily table shows input, output, cache-creation, and
@@ -148,10 +173,11 @@ to re-render an existing report).
 
 Beyond raw speed, `agentsview usage`:
 
-- **Covers every supported agent** — any agent whose session
-  parser populates `token_usage` shows up, not just Claude
-  Code. Filter with `--agent <name>` when you want a
-  single-agent view.
+- **Works beyond Claude Code** — the 0.20.0 release covers
+  Claude Code and Codex sessions from the same database and
+  command. More agents will light up as their parsers start
+  emitting per-message token usage. Filter with
+  `--agent <name>` when you want a single-agent view.
 - **Shares one database with the UI** — the same data powers
   [Analytics](/usage/#dashboard) and session detail views, so
   there's no second index to keep fresh.

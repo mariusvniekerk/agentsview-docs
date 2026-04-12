@@ -8,9 +8,9 @@ description: Release history for AgentsView
 
 **New features**
 
-- Add [`agentsview usage daily`](/token-usage/#agentsview-usage-daily) and [`agentsview usage statusline`](/token-usage/#agentsview-usage-statusline) commands that report token usage and estimated cost by day or for the current day. Pricing is pulled from the LiteLLM catalog with an embedded fallback for offline use. See [Token Usage & Costs](/token-usage/) for the full write-up, including benchmarks against `ccusage`.
+- Add [`agentsview usage daily`](/token-usage/#agentsview-usage-daily) and [`agentsview usage statusline`](/token-usage/#agentsview-usage-statusline) commands that report token usage and estimated cost by day or for the current day, scoped to Claude Code and Codex sessions. Pricing is pulled from the LiteLLM catalog with an embedded fallback for offline use. See [Token Usage & Costs](/token-usage/) for the full write-up, including benchmarks against `ccusage`.
 - Add [OpenHands CLI](/configuration/#session-discovery) session support. Local OpenHands conversations under `~/.openhands/conversations` are discovered, synced, and rendered alongside other agents. A new shallow-watch mode is used for agents that store each conversation in its own subdirectory, so file watchers don't exhaust inotify limits.
-- Add [Positron Assistant](/configuration/#session-discovery) session support. Positron is a VS Code–based IDE; chat sessions under `workspaceStorage/*/chatSessions/` are parsed using the VSCode Copilot format.
+- Add [Positron Assistant](/configuration/#session-discovery) session support. Positron is a VS Code–based IDE; chat sessions under `workspaceStorage/*/chatSessions/` are parsed using the VSCode Copilot format. Built-in discovery covers macOS only in 0.20.0 — Linux and Windows users need to set `POSITRON_DIR` or `positron_dirs`.
 - Filter pinned messages by the currently selected project. The [Pinned](/usage/#pinned-messages) page only shows pins from the active project, the count badge reflects the filtered total, and a dedicated empty state is shown when the filter yields no results.
 
 **Improvements**
@@ -22,6 +22,8 @@ description: Release history for AgentsView
 
 - Auto-recover the macOS desktop app when WKWebView's content process is killed during sleep/wake. A Rust-side focus probe detects a dead WebView and force-reloads it; a JavaScript `visibilitychange` handler pings the backend and reloads if unreachable.
 - Honor `pi_dirs`, `cursor_project_dirs`, and `amp_dirs` from `config.toml`. These arrays were previously dropped by the loader because the registry entries for Pi, Cursor, and Amp were missing `ConfigKey`.
+- Claude Code streaming messages were being recorded multiple times by the parser, inflating historical input-token totals by roughly 2×. The parser now deduplicates them. After upgrading, the first `agentsview usage` invocation triggers a full resync so historical totals are recomputed with the fix.
+- Codex sessions now capture the per-request `token_count` events embedded in `event_msg` entries, so Codex messages populate token usage (and therefore show up in [`agentsview usage daily`](/token-usage/)) where they previously reported zero.
 
 ---
 

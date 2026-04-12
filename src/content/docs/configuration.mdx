@@ -87,15 +87,17 @@ AgentsView auto-discovers session files from twenty agent types:
 Code Insiders and VSCodium variants are also discovered
 automatically.
 
-**Positron Assistant default directories** vary by platform:
+**Positron Assistant default directory** (macOS only):
 
 - **macOS:** `~/Library/Application Support/Positron/User/`
-- **Linux:** `~/.config/Positron/User/`
-- **Windows:** `%APPDATA%/Positron/User/`
 
 Positron is an IDE built on VS Code, so sessions use the same
 `workspaceStorage/<hash>/chatSessions/` layout as VS Code
-Copilot.
+Copilot. As of v0.20.0, Positron Assistant has a built-in
+default path only on macOS — on Linux and Windows, set
+`POSITRON_DIR` or `positron_dirs` to point at your Positron
+user directory (for example, `~/.config/Positron/User` on
+Linux or `%APPDATA%\Positron\User` on Windows).
 
 **OpenHands CLI shallow watch:** OpenHands stores each
 conversation in its own subdirectory, which would consume one

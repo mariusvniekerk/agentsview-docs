@@ -86,9 +86,9 @@ much you spent on Claude Code yesterday, try
 [`agentsview usage`](/token-usage/) instead. It reads from the
 same pre-indexed SQLite database that powers the rest of
 AgentsView, so reports come back in well under a second even on
-large histories — and it covers every
-[agent AgentsView supports](/configuration/#session-discovery),
-not just Claude Code.
+large histories. In 0.20.0 it reports on **Claude Code and
+Codex** sessions, with more agents landing as their parsers
+start recording per-message token usage.
 
 ```bash
 agentsview usage daily          # last 30 days, terminal table
@@ -137,9 +137,9 @@ to a shared database for team or multi-machine setups.
   </Card>
   <Card title="Token Usage & Costs" icon="seti:db">
     A sub-second [`agentsview usage`](/token-usage/) CLI for
-    daily spend reports and a today's-cost status line. Drop-in
-    alternative to `ccusage` that covers every supported agent
-    and runs 80–220× faster on large session histories.
+    daily spend reports and a today's-cost status line. A
+    `ccusage` alternative for Claude Code and Codex sessions
+    that runs 80–220× faster on large session histories.
   </Card>
   <Card title="Live Sync" icon="setting">
     Watches your session directories for changes and
