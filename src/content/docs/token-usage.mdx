@@ -36,7 +36,19 @@ agentsview usage daily --json > spend.json
 agentsview usage statusline
 ```
 
-![agentsview usage daily terminal output](/screenshots/usage-daily.png)
+```
+DATE        INPUT   OUTPUT  CACHE_CR  CACHE_RD  COST      MODELS
+----        -----   ------  --------  --------  ----      ------
+2026-04-10  52130   184250  412008    3821044   $12.8431  claude-opus-4-6, gpt-5.1
+2026-04-11  48910   201320  458902    4102887   $14.0217  claude-opus-4-6
+2026-04-12  33410   142805  301223    2984511   $9.6052   claude-opus-4-6, gpt-5.1
+----        -----   ------  --------  --------  ----      ------
+TOTAL       134450  528375  1172133   10908442  $36.4700
+```
+
+```
+$9.61 today
+```
 
 The daily table shows input, output, cache-creation, and
 cache-read token totals per local-time day, the estimated cost,
