@@ -24,8 +24,10 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
   <img src="/agents/copilot.svg" alt="Copilot" data-agent="copilot" width="419" height="95" />
   <img src="/agents/cursor.svg" alt="Cursor" data-agent="cursor" width="800" height="190" />
   <img src="/agents/opencode.svg" alt="OpenCode" data-agent="opencode" width="641" height="115" />
+  <img src="/agents/openhands.svg" alt="OpenHands" data-agent="openhands" width="550" height="65" />
   <img src="/agents/amp.svg" alt="Amp" data-agent="amp" width="400" height="75" />
   <img src="/agents/vscode-copilot.svg" alt="VS Code Copilot" data-agent="vscode-copilot" width="600" height="60" />
+  <img src="/agents/positron.svg" alt="Positron Assistant" data-agent="positron" width="500" height="65" />
   <img src="/agents/openclaw.svg" alt="OpenClaw" data-agent="openclaw" width="500" height="65" />
   <img src="/agents/pi.svg" alt="Pi" data-agent="pi" width="400" height="65" />
   <img src="/agents/iflow.svg" alt="iFlow" data-agent="iflow" width="400" height="65" />
@@ -78,6 +80,31 @@ The desktop app and CLI share the same data directory
 fully complementary.
 :::
 
+## Fast Token Usage & Cost Reports
+
+If you've been reaching for
+[`ccusage`](https://github.com/ryoppippi/ccusage) to see how
+much you spent on Claude Code yesterday, try
+[`agentsview usage`](/token-usage/) instead. It reads from the
+same pre-indexed SQLite database that powers the rest of
+AgentsView, so reports come back in well under a second even on
+large histories. In 0.20.0 it reports on **Claude Code and
+Codex** sessions, with more agents landing as their parsers
+start recording per-message token usage.
+
+```bash
+agentsview usage daily          # last 30 days, terminal table
+agentsview usage daily --all    # full history, JSON-friendly
+agentsview usage statusline     # $9.61 today
+```
+
+On a 22,000-session local database, `agentsview usage daily`
+runs **80–220× faster** than `npx ccusage@latest daily` (see
+[benchmarks](/token-usage/#how-it-compares-to-ccusage)). On
+smaller databases the absolute gap is smaller, but reports
+still come back sub-second. See
+[Token Usage & Costs](/token-usage/) for the full write-up.
+
 ## What It Does
 
 AgentsView reads the session files that your
@@ -110,6 +137,12 @@ to a shared database for team or multi-machine setups.
     metrics, per-project stats, and session distribution
     charts. Understand how you use agents over time.
   </Card>
+  <Card title="Token Usage & Costs" icon="seti:db">
+    A sub-second [`agentsview usage`](/token-usage/) CLI for
+    daily spend reports and a today's-cost status line. A
+    `ccusage` alternative for Claude Code and Codex sessions
+    that runs 80–220× faster on large session histories.
+  </Card>
   <Card title="Live Sync" icon="setting">
     Watches your session directories for changes and
     streams new messages in real time. Start a coding
@@ -117,10 +150,10 @@ to a shared database for team or multi-machine setups.
     in another.
   </Card>
   <Card title="Multi-Agent Support" icon="rocket">
-    Works with [18 AI coding agents](/configuration/#session-discovery)
-    including Claude Code, Codex, Copilot, Cursor,
-    and Gemini. Auto-discovers session directories
-    so there's nothing to configure.
+    Works with [20 AI coding agents](/configuration/#session-discovery)
+    including Claude Code, Codex, Copilot, Cursor, Gemini,
+    and OpenHands. Auto-discovers session directories so
+    there's nothing to configure.
   </Card>
   <Card title="Import Chat History" icon="document">
     Import your [Claude.ai and ChatGPT](/chat-import/)
