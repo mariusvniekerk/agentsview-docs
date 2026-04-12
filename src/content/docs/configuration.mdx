@@ -53,7 +53,7 @@ see [Remote Access](/remote-access/) for details.
 
 ## Session Discovery
 
-AgentsView auto-discovers session files from eighteen agent types:
+AgentsView auto-discovers session files from twenty agent types:
 
 | Agent | Default Directory | File Format |
 |-------|-------------------|-------------|
@@ -63,8 +63,10 @@ AgentsView auto-discovers session files from eighteen agent types:
 | Cursor | `~/.cursor/projects/` | JSONL or plain-text transcripts |
 | Gemini CLI | `~/.gemini/` | JSONL in `tmp/` subdirectory |
 | OpenCode | `~/.local/share/opencode/` | SQLite database |
+| OpenHands CLI | `~/.openhands/conversations/` | Per-conversation `base_state.json` + `events/*.json` |
 | Amp | `~/.local/share/amp/threads/` | JSON per thread |
 | VS Code Copilot | (platform-specific, see below) | JSON / JSONL per session |
+| Positron Assistant | (platform-specific, see below) | JSON / JSONL per session |
 | OpenClaw | `~/.openclaw/agents/` | JSONL per session |
 | Pi | `~/.pi/agent/sessions/` | JSONL per session |
 | iFlow | `~/.iflow/projects/` | JSONL per session |
@@ -84,6 +86,30 @@ AgentsView auto-discovers session files from eighteen agent types:
 
 Code Insiders and VSCodium variants are also discovered
 automatically.
+
+**Positron Assistant default directories** vary by platform:
+
+- **macOS:** `~/Library/Application Support/Positron/User/`
+- **Linux:** `~/.config/Positron/User/`
+- **Windows:** `%APPDATA%/Positron/User/`
+
+Positron is an IDE built on VS Code, so sessions use the same
+`workspaceStorage/<hash>/chatSessions/` layout as VS Code
+Copilot.
+
+**OpenHands CLI shallow watch:** OpenHands stores each
+conversation in its own subdirectory, which would consume one
+recursive file watch per session and can exhaust inotify
+limits on Linux. AgentsView watches the root
+`~/.openhands/conversations/` directory non-recursively and
+relies on the 15-minute periodic sync to pick up changes
+inside existing conversations. New conversation directories
+are still detected immediately. The server's startup log
+reports how many directories are watched this way:
+
+```
+Watching 74 directories for changes (2 shallow) (76ms)
+```
 
 **Warp default directories** vary by platform:
 
@@ -107,8 +133,10 @@ export COPILOT_DIR=~/custom/copilot
 export CURSOR_PROJECTS_DIR=~/custom/cursor
 export GEMINI_DIR=~/custom/gemini
 export OPENCODE_DIR=~/custom/opencode
+export OPENHANDS_CONVERSATIONS_DIR=~/custom/openhands
 export AMP_DIR=~/custom/amp
 export VSCODE_COPILOT_DIR=~/custom/vscode
+export POSITRON_DIR=~/custom/positron
 export OPENCLAW_DIR=~/custom/openclaw
 export PI_DIR=~/custom/pi
 export IFLOW_DIR=~/custom/iflow
@@ -141,7 +169,8 @@ codex_sessions_dirs = [
 The corresponding fields are `claude_project_dirs`,
 `codex_sessions_dirs`, `copilot_dirs`,
 `cursor_project_dirs`, `gemini_dirs`, `opencode_dirs`,
-`amp_dirs`, `vscode_copilot_dirs`, `openclaw_dirs`,
+`openhands_dirs`, `amp_dirs`, `vscode_copilot_dirs`,
+`positron_dirs`, `openclaw_dirs`,
 `pi_dirs`, `iflow_dirs`, `zencoder_dirs`, `kimi_dirs`,
 `warp_dirs`, `hermes_sessions_dirs`, `cortex_dirs`,
 `kiro_dirs`, and `kiro_ide_dirs`.

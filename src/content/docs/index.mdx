@@ -78,6 +78,31 @@ The desktop app and CLI share the same data directory
 fully complementary.
 :::
 
+## Fast Token Usage & Cost Reports
+
+If you've been reaching for
+[`ccusage`](https://github.com/ryoppippi/ccusage) to see how
+much you spent on Claude Code yesterday, try
+[`agentsview usage`](/token-usage/) instead. It reads from the
+same pre-indexed SQLite database that powers the rest of
+AgentsView, so reports come back in well under a second even on
+large histories — and it covers every
+[agent AgentsView supports](/configuration/#session-discovery),
+not just Claude Code.
+
+```bash
+agentsview usage daily          # last 30 days, terminal table
+agentsview usage daily --all    # full history, JSON-friendly
+agentsview usage statusline     # $9.61 today
+```
+
+On a 22,000-session local database, `agentsview usage daily`
+runs **80–220× faster** than `npx ccusage@latest daily` (see
+[benchmarks](/token-usage/#how-it-compares-to-ccusage)). On
+smaller databases the absolute gap is smaller, but reports
+still come back sub-second. See
+[Token Usage & Costs](/token-usage/) for the full write-up.
+
 ## What It Does
 
 AgentsView reads the session files that your
@@ -110,6 +135,12 @@ to a shared database for team or multi-machine setups.
     metrics, per-project stats, and session distribution
     charts. Understand how you use agents over time.
   </Card>
+  <Card title="Token Usage & Costs" icon="seti:db">
+    A sub-second [`agentsview usage`](/token-usage/) CLI for
+    daily spend reports and a today's-cost status line. Drop-in
+    alternative to `ccusage` that covers every supported agent
+    and runs 80–220× faster on large session histories.
+  </Card>
   <Card title="Live Sync" icon="setting">
     Watches your session directories for changes and
     streams new messages in real time. Start a coding
@@ -117,10 +148,10 @@ to a shared database for team or multi-machine setups.
     in another.
   </Card>
   <Card title="Multi-Agent Support" icon="rocket">
-    Works with [18 AI coding agents](/configuration/#session-discovery)
-    including Claude Code, Codex, Copilot, Cursor,
-    and Gemini. Auto-discovers session directories
-    so there's nothing to configure.
+    Works with [20 AI coding agents](/configuration/#session-discovery)
+    including Claude Code, Codex, Copilot, Cursor, Gemini,
+    and OpenHands. Auto-discovers session directories so
+    there's nothing to configure.
   </Card>
   <Card title="Import Chat History" icon="document">
     Import your [Claude.ai and ChatGPT](/chat-import/)

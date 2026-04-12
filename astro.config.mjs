@@ -83,6 +83,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Quick Start', slug: 'quickstart' },
         { label: 'Usage Guide', slug: 'usage' },
+        { label: 'Token Usage & Costs', slug: 'token-usage' },
         { label: 'Chat Import', slug: 'chat-import' },
         { label: 'Session Insights', slug: 'insights' },
         { label: 'CLI Reference', slug: 'commands' },

@@ -1,0 +1,333 @@
+---
+title: Token Usage & Costs
+description: Fast token usage and cost reports from your local AgentsView database
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+AgentsView ingests the raw `token_usage` blobs from every
+supported agent's session files, so the database already knows
+every input, output, cache-creation, and cache-read token your
+agents have logged. The `agentsview usage` commands turn that
+into daily cost reports and a one-line today's-spend summary —
+without re-reading any JSONL files.
+
+If you've used [`ccusage`](https://github.com/ryoppippi/ccusage)
+this will feel familiar. AgentsView covers the same core job —
+"how much did I spend on AI coding yesterday?" — for every agent
+AgentsView supports, not just Claude Code. Because it reads from
+pre-indexed SQLite instead of re-parsing JSONL on every
+invocation, it's also dramatically faster on large histories
+(see [benchmarks](#how-it-compares-to-ccusage) below).
+
+## Quick Tour
+
+```bash
+# Last 30 days of spend as a terminal table
+agentsview usage daily
+
+# Full history, with per-model breakdown rows
+agentsview usage daily --all --breakdown
+
+# JSON output for scripting
+agentsview usage daily --json > spend.json
+
+# One-line today's spend (for prompt or tmux status line)
+agentsview usage statusline
+```
+
+![agentsview usage daily terminal output](/screenshots/usage-daily.png)
+
+The daily table shows input, output, cache-creation, and
+cache-read token totals per local-time day, the estimated cost,
+and the models that contributed to each row. Adding
+`--breakdown` prints indented per-model sub-rows so you can see
+which model drove the spend on each day.
+
+## How Costs Are Computed
+
+Every message parsed from a session file stores its raw
+`token_usage` JSON (input, output, cache creation, cache read)
+and the model name reported by the agent. The usage command:
+
+1. Loads the `model_pricing` table into memory once per
+   invocation. The table holds per-million-token rates for
+   input, output, cache creation, and cache read.
+2. Scans `messages` filtered by the requested date range and
+   agent, parsing each row's `token_usage` blob in Go with
+   `gjson` — faster than SQLite's per-row `json_extract`.
+3. Multiplies each row's tokens by the model's rates, buckets
+   the result by local-time day, and aggregates per model.
+
+The default window is the last 30 days; pass `--all` to scan
+the full history.
+
+:::note
+AgentsView does not mint usage events on your behalf. It can
+only report token usage that the agent wrote to its own
+session files. Agents that don't emit token counts (or that
+strip them from local logs) won't show up.
+:::
+
+### Pricing Source
+
+Model rates come from the
+[LiteLLM model pricing catalog](https://github.com/BerriAI/litellm),
+which is fetched on each `usage` invocation and upserted into
+the `model_pricing` table. If the fetch fails — no network, or
+LiteLLM is down — AgentsView falls back to an embedded copy of
+the catalog so offline use keeps working. Pass `--offline` to
+skip the fetch entirely and always use the embedded fallback.
+
+The embedded fallback is updated with AgentsView releases, so
+the numbers are as current as your installed version. For
+up-to-the-minute rates, leave `--offline` off.
+
+### Claude Streaming & Codex Token Events
+
+The 0.20.0 cost tracking release also improved how raw token
+usage is extracted so the input side of the equation is
+accurate:
+
+- **Claude Code:** streaming deltas previously wrote the same
+  token counts multiple times, roughly doubling input totals.
+  The parser now deduplicates them.
+- **Codex:** per-request `token_count` events embedded in
+  `event_msg` entries are now captured, so Codex sessions have
+  populated token usage where they previously reported zero.
+
+If you upgraded from an earlier version, the first `usage`
+invocation triggers a full resync so these corrections apply
+to historical sessions.
+
+## How It Compares to `ccusage`
+
+`ccusage` re-walks every Claude Code JSONL file and re-parses
+from scratch on every invocation. `agentsview usage` queries
+pre-indexed SQLite with an in-memory pricing join, so the cost
+of reporting drops dramatically as history grows.
+
+Measured on a real 22,000-session database (~310,000
+token-bearing messages) on an M5 Max, median of 5 steady-state
+runs:
+
+| Command | Time | Speedup vs `ccusage` |
+|---|---:|---:|
+| `npx ccusage@latest daily --json --offline` | 44.59 s | 1× |
+| `agentsview usage daily --json --all --offline` | 0.53 s | **84×** |
+| `agentsview usage daily --json --offline` (default 30 d) | 0.41 s | **109×** |
+| `agentsview usage daily --json --offline --no-sync` | 0.20 s | **223×** |
+
+:::note
+These numbers are from a large local database (22k sessions,
+310k token-bearing messages). The speedup scales with session
+count — smaller databases will see smaller absolute differences
+because `ccusage` has less JSONL to re-parse, but AgentsView
+stays in the sub-second range either way. The ratios above are
+an upper bound, not a universal guarantee.
+:::
+
+Apples-to-apples: `ccusage` scans all history by default, so
+the `--all` row is the matched comparison. The default 30-day
+window is faster still because most invocations don't need
+four months of history, and `--no-sync` skips the
+refresh-recent-files pass entirely (useful when you just want
+to re-render an existing report).
+
+Beyond raw speed, `agentsview usage`:
+
+- **Covers every supported agent** — any agent whose session
+  parser populates `token_usage` shows up, not just Claude
+  Code. Filter with `--agent <name>` when you want a
+  single-agent view.
+- **Shares one database with the UI** — the same data powers
+  [Analytics](/usage/#dashboard) and session detail views, so
+  there's no second index to keep fresh.
+- **Includes on-demand sync** — when no AgentsView server is
+  running, `usage` does a quick incremental sync scoped to
+  files modified since the last sync start time so reports
+  always reflect current state. Skip with `--no-sync` for the
+  fastest path.
+
+## `agentsview usage daily`
+
+Daily cost report. Outputs a tab-aligned table to stdout by
+default, or JSON with `--json`.
+
+```bash
+agentsview usage daily [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--json` | `false` | Emit a JSON document instead of a table |
+| `--since` | `30 days ago` | Start date (`YYYY-MM-DD`), inclusive |
+| `--until` |  | End date (`YYYY-MM-DD`), inclusive |
+| `--all` | `false` | Include all history; overrides the default 30-day window |
+| `--agent` |  | Filter by agent name (e.g. `claude`, `codex`) |
+| `--breakdown` | `false` | Show indented per-model sub-rows under each day |
+| `--offline` | `false` | Skip the LiteLLM fetch; use the embedded fallback pricing |
+| `--no-sync` | `false` | Skip the on-demand sync pass before querying |
+| `--timezone` | system | IANA timezone name used for date bucketing |
+
+The default 30-day window only kicks in when neither `--since`
+nor `--until` nor `--all` is given. Passing just `--until`
+leaves the start open so "everything up to X" still works.
+
+**JSON shape:**
+
+```json
+{
+  "daily": [
+    {
+      "date": "2026-04-12",
+      "inputTokens": 33410,
+      "outputTokens": 142805,
+      "cacheCreationTokens": 301223,
+      "cacheReadTokens": 2984511,
+      "totalCost": 9.6052,
+      "modelsUsed": ["claude-opus-4-6", "gpt-5.1"],
+      "modelBreakdowns": [
+        {
+          "modelName": "claude-opus-4-6",
+          "inputTokens": 28102,
+          "outputTokens": 124901,
+          "cacheCreationTokens": 287441,
+          "cacheReadTokens": 2812004,
+          "cost": 8.4123
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "inputTokens": 134450,
+    "outputTokens": 528375,
+    "cacheCreationTokens": 1172133,
+    "cacheReadTokens": 10908442,
+    "totalCost": 36.4700
+  }
+}
+```
+
+`modelsUsed` is sorted by cost within each day, so the most
+expensive model appears first. `modelBreakdowns` always
+includes a row per model, regardless of whether `--breakdown`
+was passed; the flag only controls terminal table output.
+
+The JSON schema is considered stable for the fields shown
+above, but new fields may be added in future releases — treat
+it as additive and ignore unknown keys.
+
+## `agentsview usage statusline`
+
+One-line today's spend, designed for shell prompts, tmux
+status lines, and window titles.
+
+```bash
+agentsview usage statusline [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--agent` |  | Filter by agent name |
+| `--offline` | `false` | Use embedded fallback pricing only |
+| `--no-sync` | `false` | Skip on-demand sync |
+
+Output is a single line:
+
+```
+$9.61 today
+```
+
+With `--agent claude`:
+
+```
+$6.42 today (claude)
+```
+
+The command always scopes to the current local-time day. Use
+`agentsview usage daily --since $(date +%Y-%m-%d)` if you want
+the full row instead.
+
+### Example: Starship Prompt Module
+
+```toml
+# ~/.config/starship.toml
+[custom.agentsview]
+command = "agentsview usage statusline --offline --no-sync"
+when = "true"
+format = "[$output]($style) "
+style = "bold green"
+```
+
+Pair with `--no-sync` so the prompt never blocks on a sync
+pass; a separate `agentsview` server (or a periodic
+`agentsview sync` cron) keeps the database fresh.
+
+## On-Demand Sync
+
+When no AgentsView server is running, the `usage` commands do
+a quick incremental sync before querying so reports always
+include recent activity:
+
+1. If the parser data version has changed (i.e. you just
+   upgraded), a full resync runs first.
+2. Otherwise, the sync scans only files modified since the
+   last recorded sync start time, minus a 10-second safety
+   margin to catch files written during the prior sync.
+
+If an `agentsview serve` (or `agentsview pg serve`) process is
+already running, the file watcher already has you covered and
+the on-demand sync is skipped to avoid duplicate work.
+
+Pass `--no-sync` to skip the refresh unconditionally — useful
+for scripting and for prompt modules that must stay snappy.
+
+## Scripting Examples
+
+**Monthly spend for the current month:**
+
+```bash
+agentsview usage daily \
+  --since "$(date +%Y-%m-01)" \
+  --json \
+  | jq '.totals.totalCost'
+```
+
+**Per-agent totals for the last 7 days:**
+
+```bash
+for a in claude codex copilot gemini; do
+  total=$(agentsview usage daily \
+    --since "$(date -v-7d +%Y-%m-%d)" \
+    --agent "$a" \
+    --json 2>/dev/null \
+    | jq '.totals.totalCost')
+  printf "%-8s  \$%s\n" "$a" "$total"
+done
+```
+
+**Alert when today crosses a budget:**
+
+```bash
+today=$(agentsview usage statusline --offline --no-sync \
+  | tr -dc '0-9.')
+if awk -v t="$today" 'BEGIN {exit !(t+0 > 25)}'; then
+  osascript -e 'display notification "AI spend > $25 today" \
+    with title "AgentsView"'
+fi
+```
+
+## Where the Data Lives
+
+Usage reports read from the same local SQLite database that
+powers the [web UI](/usage/) and
+[Analytics dashboard](/usage/#dashboard). Token usage is
+stored on each message row in the `messages` table; pricing is
+cached in a small `model_pricing` table that's refreshed on
+each `usage` invocation.
+
+No data leaves your machine. The only outbound request is the
+LiteLLM pricing fetch, which you can disable with `--offline`.
+See [Privacy and Telemetry](/configuration/#privacy-and-telemetry)
+for the full picture.

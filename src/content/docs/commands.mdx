@@ -136,6 +136,67 @@ agentsview v0.1.0 (abc1234) built 2025-01-15
 
 ---
 
+### `agentsview usage daily`
+
+Report token usage and estimated cost aggregated by local-time
+day, scoped to the last 30 days by default. See
+[Token Usage & Costs](/token-usage/) for a full write-up,
+including benchmarks against `ccusage`.
+
+```bash
+agentsview usage daily [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--json` | `false` | Emit JSON instead of a terminal table |
+| `--since` | `30 days ago` | Start date (`YYYY-MM-DD`), inclusive |
+| `--until` | | End date (`YYYY-MM-DD`), inclusive |
+| `--all` | `false` | Scan all history; overrides the default 30-day window |
+| `--agent` | | Filter by agent name |
+| `--breakdown` | `false` | Show indented per-model rows under each day |
+| `--offline` | `false` | Skip the LiteLLM pricing fetch; use embedded fallback |
+| `--no-sync` | `false` | Skip the on-demand sync pass before querying |
+| `--timezone` | system | IANA timezone name for date bucketing |
+
+**Examples:**
+
+```bash
+agentsview usage daily                           # last 30 days
+agentsview usage daily --all                     # full history
+agentsview usage daily --since 2026-04-01 --breakdown
+agentsview usage daily --json --agent claude
+```
+
+---
+
+### `agentsview usage statusline`
+
+Print today's total estimated cost as a single line, for
+shell prompts and tmux status lines.
+
+```bash
+agentsview usage statusline [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--agent` | | Filter by agent name |
+| `--offline` | `false` | Use embedded fallback pricing only |
+| `--no-sync` | `false` | Skip on-demand sync |
+
+**Example:**
+
+```bash
+$ agentsview usage statusline
+$9.61 today
+```
+
+See [Token Usage & Costs](/token-usage/#agentsview-usage-statusline)
+for integration examples (Starship, tmux).
+
+---
+
 ### `agentsview token-use`
 
 Print machine-readable token usage data for a single session.
@@ -298,8 +359,10 @@ agentsview help
 | `CURSOR_PROJECTS_DIR` | `~/.cursor/projects` | Cursor transcripts directory |
 | `GEMINI_DIR` | `~/.gemini` | Gemini CLI directory |
 | `OPENCODE_DIR` | `~/.local/share/opencode` | OpenCode data directory |
+| `OPENHANDS_CONVERSATIONS_DIR` | `~/.openhands/conversations` | OpenHands CLI conversations directory |
 | `AMP_DIR` | `~/.local/share/amp/threads` | Amp threads directory |
 | `VSCODE_COPILOT_DIR` | (platform-specific) | VS Code Copilot sessions directory |
+| `POSITRON_DIR` | (platform-specific) | Positron Assistant user directory |
 | `OPENCLAW_DIR` | `~/.openclaw/agents` | OpenClaw agents directory |
 | `PI_DIR` | `~/.pi/agent/sessions` | Pi sessions directory |
 | `IFLOW_DIR` | `~/.iflow/projects` | iFlow projects directory |
