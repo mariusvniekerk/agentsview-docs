@@ -1,11 +1,13 @@
 /* dark-blue theme for AgentsView docs */
 
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
-
 :root {
-  /* Typography */
-  --sl-font: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --sl-font-mono: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* Typography - system font for body, monospace for code */
+  --sl-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --sl-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --sl-text-body: 1rem;
+  --sl-text-code: 0.9rem;
+  --sl-text-code-sm: 0.85rem;
+  --sl-line-height: 1.6;
 
   /* Colors - dark terminal aesthetic with blue accent */
   --sl-color-accent-low: #0d1f33;
@@ -101,13 +103,14 @@ code:not(pre code) {
 /* Tables */
 table {
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
 th, td {
   border: 1px solid #333333;
-  padding: 0.75em 1.5em !important;
-  padding-inline-start: 1.5em !important;
-  padding-inline-end: 1.5em !important;
+  padding: 0.5em 0.75em !important;
+  padding-inline-start: 0.75em !important;
+  padding-inline-end: 0.75em !important;
   white-space: normal !important;
 }
 
@@ -300,9 +303,14 @@ nav a[aria-current="page"] {
   }
 }
 
-/* Body text - match code block font size */
-.sl-markdown-content {
-  font-size: var(--sl-text-code);
+/* Body text */
+html {
+  font-size: 16px;
+}
+
+/* Content area padding */
+.content-panel {
+  padding-inline: 2rem !important;
 }
 
 /* Headings */
@@ -313,25 +321,6 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   color: #5b9bf5;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 0;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555555;
 }
 
 /* Selection */
