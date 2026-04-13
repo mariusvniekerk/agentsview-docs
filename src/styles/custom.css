@@ -44,7 +44,14 @@
   /* Layout - maximize content width */
   --sl-content-width: 55rem;
   --sl-sidebar-width: 17rem;
-  --sl-content-pad-x: 1rem;
+  --sl-content-pad-x: 2rem;
+}
+
+/* Tighter content padding on narrow screens */
+@media (max-width: 50rem) {
+  :root {
+    --sl-content-pad-x: 1rem;
+  }
 }
 
 /* Force dark mode */
@@ -306,11 +313,6 @@ nav a[aria-current="page"] {
 /* Body text */
 html {
   font-size: 16px;
-}
-
-/* Content area padding */
-.content-panel {
-  padding-inline: 2rem !important;
 }
 
 /* Headings */
