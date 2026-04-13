@@ -623,8 +623,15 @@ test.describe('Insights', () => {
   });
 
   async function navigateToInsights(page: Page) {
-    const navBtn = page.locator('.nav-btn', { hasText: 'Insights' });
-    await navBtn.click();
+    // Insights lives under the More dropdown as of 0.21.0
+    const moreBtn = page.locator('.nav-btn', { hasText: 'More' });
+    await expect(moreBtn).toBeVisible({ timeout: 5_000 });
+    await moreBtn.click();
+    const insightsItem = page.locator(
+      '.more-item', { hasText: 'Insights' }
+    );
+    await expect(insightsItem).toBeVisible({ timeout: 5_000 });
+    await insightsItem.click();
     await page.waitForSelector('.insights-page', {
       timeout: 10_000,
     });
