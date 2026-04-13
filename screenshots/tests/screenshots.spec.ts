@@ -1080,3 +1080,94 @@ test.describe('Activity minimap', () => {
     await minimapBtn.click();
   });
 });
+
+// ── Usage dashboard (token usage & cost) ────────────────
+
+test.describe('Usage dashboard', () => {
+  async function navigateToUsage(page: Page) {
+    const navBtn = page.locator('.nav-btn', { hasText: 'Usage' });
+    await expect(navBtn).toBeVisible({ timeout: 5_000 });
+    await navBtn.click();
+    await page.waitForSelector('.usage-page', { timeout: 10_000 });
+    // Wait for summary + charts to finish loading
+    await expect(
+      page.locator('.usage-page .summary-cards .card').first()
+    ).toBeVisible({ timeout: 10_000 });
+    // Give SVG charts time to render
+    await page.waitForTimeout(2000);
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await navigateToUsage(page);
+  });
+
+  test('full usage page', async ({ page }) => {
+    await snap(page, 'usage-page');
+  });
+
+  test('usage summary cards', async ({ page }) => {
+    const cards = page.locator('.usage-page .summary-cards');
+    await snapEl(cards, 'usage-summary-cards');
+  });
+
+  test('usage toolbar with filters', async ({ page }) => {
+    const toolbar = page.locator('.usage-toolbar');
+    await snapEl(toolbar, 'usage-toolbar');
+  });
+
+  test('cost over time chart', async ({ page }) => {
+    const panel = page.locator(
+      '.usage-page .chart-panel:has(.chart-title:text("Cost Over Time"))'
+    );
+    await expect(panel).toBeVisible({ timeout: 5_000 });
+    await panel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await snapEl(panel, 'usage-cost-trend');
+  });
+
+  test('attribution treemap', async ({ page }) => {
+    const panel = page.locator('.attribution-panel');
+    await expect(panel).toBeVisible({ timeout: 5_000 });
+    await panel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    // Treemap is the default view
+    await snapEl(panel, 'usage-attribution');
+  });
+
+  test('top sessions by cost', async ({ page }) => {
+    const panel = page.locator(
+      '.chart-panel:has(.top-sessions-container)'
+    );
+    await expect(panel).toBeVisible({ timeout: 5_000 });
+    await panel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await snapEl(panel, 'usage-top-sessions');
+  });
+
+  test('cache efficiency panel', async ({ page }) => {
+    const panel = page.locator('.chart-panel:has(.cache-panel)');
+    await expect(panel).toBeVisible({ timeout: 5_000 });
+    await panel.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await snapEl(panel, 'usage-cache-efficiency');
+  });
+
+  test('model filter dropdown open', async ({ page }) => {
+    // Click the Model filter trigger in the toolbar
+    const trigger = page.locator(
+      '.usage-toolbar .filter-dropdown .filter-trigger',
+      { hasText: 'Model' }
+    );
+    await expect(trigger).toBeVisible({ timeout: 5_000 });
+    await trigger.click();
+    await page.waitForSelector(
+      '.filter-dropdown .dropdown-panel',
+      { timeout: 5_000 }
+    );
+    await page.waitForTimeout(300);
+    await snap(page, 'usage-filter-dropdown');
+    await page.keyboard.press('Escape');
+  });
+});

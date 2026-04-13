@@ -4,10 +4,17 @@ FROM golang:1.25-bookworm AS builder
 ARG AV_VERSION=dev
 ARG AV_COMMIT=unknown
 
+# Download the nodesource setup script to a file before running
+# it. `curl | bash` hides curl failures (bash exits 0 on empty
+# stdin) and the resulting layer gets cached as a "success",
+# leaving apt-get to install Debian's stock nodejs without npm.
 RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y curl ca-certificates && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x \
+      -o /tmp/nodesource_setup.sh && \
+    bash /tmp/nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    rm /tmp/nodesource_setup.sh
 
 WORKDIR /src
 COPY agentsview/ .

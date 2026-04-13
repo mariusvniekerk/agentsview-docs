@@ -7,25 +7,53 @@ set -euo pipefail
 SOURCE="/data/source.db"
 OUTPUT="/data/test-sessions.db"
 
-PROJECTS="'roborev','roborev_docs','agentsview'"
-
 echo "Extracting open-source projects from source database..."
 
 # Copy the full database to preserve exact schema
 cp "$SOURCE" "$OUTPUT"
 
-# Delete sessions (and related data) for non-matching projects
-sqlite3 "$OUTPUT" <<SQL
+# Delete sessions (and related data) for non-matching projects.
+# The heredoc delimiter is quoted so bash does NOT expand $ or
+# backticks inside — the embedded markdown contains both, and
+# unquoted expansion would run file paths as commands.
+sqlite3 "$OUTPUT" <<'SQL'
+-- Drop FTS5 sync triggers before the bulk delete. Each
+-- DELETE FROM messages otherwise fires messages_ad which
+-- runs an FTS5 'delete' command, and that trips
+-- "constraint failed (19)" at scale. We rebuild the FTS
+-- index after the deletes and restore the triggers at
+-- the end so the test DB still supports in-session search.
+DROP TRIGGER IF EXISTS messages_ai;
+DROP TRIGGER IF EXISTS messages_ad;
+DROP TRIGGER IF EXISTS messages_au;
+
 DELETE FROM tool_calls WHERE session_id IN (
-  SELECT id FROM sessions WHERE project NOT IN ($PROJECTS)
+  SELECT id FROM sessions WHERE project NOT IN ('roborev','roborev_docs','agentsview')
 );
 DELETE FROM messages WHERE session_id IN (
-  SELECT id FROM sessions WHERE project NOT IN ($PROJECTS)
+  SELECT id FROM sessions WHERE project NOT IN ('roborev','roborev_docs','agentsview')
 );
-DELETE FROM sessions WHERE project NOT IN ($PROJECTS);
+DELETE FROM sessions WHERE project NOT IN ('roborev','roborev_docs','agentsview');
 
--- Rebuild FTS index
+-- Rebuild FTS index from the surviving messages.
 INSERT INTO messages_fts(messages_fts) VALUES('rebuild');
+
+-- Restore FTS sync triggers so future inserts/updates
+-- keep the index current.
+CREATE TRIGGER messages_ai AFTER INSERT ON messages BEGIN
+    INSERT INTO messages_fts(rowid, content)
+        VALUES (new.id, new.content);
+END;
+CREATE TRIGGER messages_ad AFTER DELETE ON messages BEGIN
+    INSERT INTO messages_fts(messages_fts, rowid, content)
+        VALUES('delete', old.id, old.content);
+END;
+CREATE TRIGGER messages_au AFTER UPDATE ON messages BEGIN
+    INSERT INTO messages_fts(messages_fts, rowid, content)
+        VALUES('delete', old.id, old.content);
+    INSERT INTO messages_fts(rowid, content)
+        VALUES (new.id, new.content);
+END;
 
 -- Update stats
 INSERT OR REPLACE INTO stats (key, value) VALUES
