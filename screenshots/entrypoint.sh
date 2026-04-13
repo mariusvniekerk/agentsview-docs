@@ -74,6 +74,20 @@ SQL
 
 echo "PG data ready (two machines)."
 
+# ── Seed usage pricing via CLI ───────────────────────────
+# Workaround for a 0.21.0 bug where the /usage dashboard can
+# load before pricing is populated. Running `usage daily` here
+# synchronously fills the model_pricing table so the web UI
+# renders cost numbers on first load. Use --offline so we rely
+# on the embedded fallback catalog instead of reaching the
+# network from inside the container.
+echo "Seeding usage pricing..."
+AGENT_VIEWER_DATA_DIR="$DATA_DIR" \
+CLAUDE_PROJECTS_DIR="$EMPTY_DIR" \
+CODEX_SESSIONS_DIR="$EMPTY_DIR" \
+GEMINI_DIR="$EMPTY_DIR" \
+agentsview usage daily --offline --no-sync > /dev/null
+
 # ── Start agentsview (SQLite mode) ───────────────────────
 echo "Starting agentsview on port $PORT..."
 AGENT_VIEWER_DATA_DIR="$DATA_DIR" \

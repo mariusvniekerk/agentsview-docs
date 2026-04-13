@@ -3,6 +3,36 @@ title: Changelog
 description: Release history for AgentsView
 ---
 
+## 0.22.0
+<small>2026-04-13</small>
+
+**Improvements**
+
+- Extend usage cost tracking to [OpenCode and Pi](/token-usage/#agent-coverage) sessions alongside Claude Code and Codex. Their token counts now flow into the [Usage dashboard](/token-usage/#usage-dashboard) and `agentsview usage` CLI reports.
+- Refine the Usage dashboard summary cards and cost-over-time chart for clearer cost reporting.
+
+**Bug fixes**
+
+- Sync Codex `exec` sessions so execution activity appears reliably in AgentsView.
+- Fix usage accounting so total cost data stays complete across supported providers.
+
+---
+
+## 0.21.0
+<small>2026-04-13</small>
+
+**New features**
+
+- Add a [token usage dashboard](/token-usage/#usage-dashboard) to the web UI for exploring cost and token totals across your agent sessions. The new `/usage` page shows summary cards, a cost-over-time chart, a cost attribution treemap with project/model/agent toggles, top sessions by cost, and a cache efficiency panel. Filter by project, agent, model, and date range — filter state is written back to the URL so views are shareable and bookmarkable.
+- Add backing API endpoints for the usage dashboard so scripts and external tools can fetch the same summary, time series, and attribution data the UI uses.
+
+**Bug fixes**
+
+- Prevent some Claude usage records from being double-counted in cost and token totals.
+- Correct Opus 4.6 pricing in usage cost calculations.
+
+---
+
 ## 0.20.0
 <small>2026-04-12</small>
 
