@@ -24,7 +24,7 @@ require_auth = true
 Then start the server on a non-loopback interface:
 
 ```bash
-agentsview serve -host 0.0.0.0
+agentsview serve --host 0.0.0.0
 ```
 
 When auth is enabled, AgentsView generates a token if needed and
@@ -80,21 +80,21 @@ When you access AgentsView through a hostname or reverse proxy,
 tell the server about the public URL:
 
 ```bash
-agentsview serve -public-url https://agents.example.com
+agentsview serve --public-url https://agents.example.com
 ```
 
-For additional trusted origins, use `-public-origin`:
+For additional trusted origins, use `--public-origin`:
 
 ```bash
 agentsview serve \
-  -public-origin https://agents.example.com \
-  -public-origin https://internal.example.com
+  --public-origin https://agents.example.com \
+  --public-origin https://internal.example.com
 ```
 
 Flags can also be comma-separated:
 
 ```bash
-agentsview serve -public-origin https://a.example.com,https://b.example.com
+agentsview serve --public-origin https://a.example.com,https://b.example.com
 ```
 
 These can also be persisted:
@@ -122,24 +122,24 @@ Setup](#quick-setup).
 
 ```bash
 agentsview serve \
-  -public-url https://agents.example.com \
-  -proxy caddy \
-  -tls-cert /path/to/cert.pem \
-  -tls-key /path/to/key.pem
+  --public-url https://agents.example.com \
+  --proxy caddy \
+  --tls-cert /path/to/cert.pem \
+  --tls-key /path/to/key.pem
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-proxy` | | Proxy mode — currently `caddy` |
-| `-caddy-bin` | `caddy` | Path to the Caddy binary |
-| `-proxy-bind-host` | `127.0.0.1` | Interface for Caddy to bind |
-| `-public-port` | `8443` | External port for the public URL |
-| `-tls-cert` | | TLS certificate file path |
-| `-tls-key` | | TLS key file path |
-| `-allowed-subnet` | | Client CIDR allowlist (repeatable or comma-separated) |
+| `--proxy` | | Proxy mode — currently `caddy` |
+| `--caddy-bin` | `caddy` | Path to the Caddy binary |
+| `--proxy-bind-host` | `127.0.0.1` | Interface for Caddy to bind |
+| `--public-port` | `8443` | External port for the public URL |
+| `--tls-cert` | | TLS certificate file path |
+| `--tls-key` | | TLS key file path |
+| `--allowed-subnet` | | Client CIDR allowlist (repeatable or comma-separated) |
 
 Caddy must already be installed and available on `PATH` unless you
-override it with `-caddy-bin`.
+override it with `--caddy-bin`.
 
 ### Subnet Allowlists
 
@@ -150,10 +150,10 @@ set before binding Caddy off loopback.
 
 ```bash
 agentsview serve \
-  -proxy caddy \
-  -proxy-bind-host 0.0.0.0 \
-  -allowed-subnet 192.168.1.0/24 \
-  -allowed-subnet 10.0.0.0/8
+  --proxy caddy \
+  --proxy-bind-host 0.0.0.0 \
+  --allowed-subnet 192.168.1.0/24 \
+  --allowed-subnet 10.0.0.0/8
 ```
 
 Requests from outside the allowed subnets receive `403`.
@@ -176,16 +176,16 @@ restart.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-host` | `127.0.0.1` | Interface to bind |
-| `-public-url` | | Public URL for hostname or proxy access |
-| `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
-| `-proxy` | | Managed proxy mode (`caddy`) |
-| `-caddy-bin` | `caddy` | Caddy binary path |
-| `-proxy-bind-host` | `127.0.0.1` | Interface for managed proxy |
-| `-public-port` | `8443` | External port for managed proxy |
-| `-tls-cert` | | TLS certificate path |
-| `-tls-key` | | TLS key path |
-| `-allowed-subnet` | | Client CIDR allowlist (repeatable/comma-separated) |
+| `--host` | `127.0.0.1` | Interface to bind |
+| `--public-url` | | Public URL for hostname or proxy access |
+| `--public-origin` | | Trusted browser origin (repeatable/comma-separated) |
+| `--proxy` | | Managed proxy mode (`caddy`) |
+| `--caddy-bin` | `caddy` | Caddy binary path |
+| `--proxy-bind-host` | `127.0.0.1` | Interface for managed proxy |
+| `--public-port` | `8443` | External port for managed proxy |
+| `--tls-cert` | | TLS certificate path |
+| `--tls-key` | | TLS key path |
+| `--allowed-subnet` | | Client CIDR allowlist (repeatable/comma-separated) |
 
 ## Config File Reference
 
@@ -222,5 +222,5 @@ allowed_subnets = ["192.168.1.0/24"]
 | `proxy.allowed_subnets` | CIDR allowlist for proxy connections |
 
 For LAN access you still need a non-loopback bind such as
-`agentsview serve -host 0.0.0.0`. `require_auth` controls API
+`agentsview serve --host 0.0.0.0`. `require_auth` controls API
 auth; it does not change the bind address by itself.

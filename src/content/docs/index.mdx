@@ -70,8 +70,8 @@ powershell -ExecutionPolicy ByPass -c "irm https://agentsview.io/install.ps1 | i
 
 ```bash
 agentsview serve              # Start server
-agentsview serve -port 9090   # Custom port
-agentsview serve -browser     # Open browser on startup
+agentsview serve --port 9090  # Custom port
+agentsview serve --no-browser # Disable browser auto-open
 ```
 
 :::note

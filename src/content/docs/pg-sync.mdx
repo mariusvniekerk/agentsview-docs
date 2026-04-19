@@ -62,10 +62,10 @@ agentsview pg push [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-full` | `false` | Force full local resync and re-push, bypassing change detection |
-| `-projects` | | Comma-separated projects to push (inclusive) |
-| `-exclude-projects` | | Comma-separated projects to exclude |
-| `-all-projects` | `false` | Ignore configured project filters for this run |
+| `--full` | `false` | Force full local resync and re-push, bypassing change detection |
+| `--projects` | | Comma-separated projects to push (inclusive) |
+| `--exclude-projects` | | Comma-separated projects to exclude |
+| `--all-projects` | `false` | Ignore configured project filters for this run |
 
 Push is on-demand — run it whenever you want to sync. There is
 no automatic background push.
@@ -83,7 +83,7 @@ unchanged sessions: first, session metadata fields (project,
 agent, timestamps, message counts) are compared; then, per-
 session message statistics (count, content length sum/max/min,
 system message ordinals, tool call counts) are checked against
-PostgreSQL. Use `-full` to bypass both layers and re-push
+PostgreSQL. Use `--full` to bypass both layers and re-push
 everything — for example, after a schema reset or when message
 content was rewritten in place.
 
@@ -98,17 +98,17 @@ to push a subset:
 
 ```bash
 # Push only these projects
-agentsview pg push -projects alpha,beta
+agentsview pg push --projects alpha,beta
 
 # Push everything except this project
-agentsview pg push -exclude-projects scratch
+agentsview pg push --exclude-projects scratch
 
 # Ignore config-file filters for this run
-agentsview pg push -all-projects
+agentsview pg push --all-projects
 ```
 
-`-projects` and `-exclude-projects` are mutually exclusive.
-`-all-projects` cannot be combined with either.
+`--projects` and `--exclude-projects` are mutually exclusive.
+`--all-projects` cannot be combined with either.
 
 Project filters can also be set in `config.toml` so you don't
 need to pass them on every run:
@@ -128,7 +128,7 @@ available project names.
 Filtered pushes do not advance the global push watermark
 because it covers all projects. This means the query window
 for subsequent filtered pushes grows over time. Run an
-unfiltered `pg push` (or `pg push -all-projects`)
+unfiltered `pg push` (or `pg push --all-projects`)
 periodically to reset the watermark.
 :::
 
@@ -166,18 +166,18 @@ agentsview pg serve [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-host` | `127.0.0.1` | Bind address |
-| `-port` | `8080` | Port |
-| `-base-path` | | URL prefix for reverse-proxy subpath |
-| `-public-url` | | Public-facing URL for proxy access |
-| `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
-| `-public-port` | `8443` | External port for managed proxy |
-| `-proxy` | | Managed proxy mode (`caddy`) |
-| `-caddy-bin` | `caddy` | Caddy binary path |
-| `-proxy-bind-host` | `0.0.0.0` | Caddy bind address |
-| `-tls-cert` | | TLS certificate path |
-| `-tls-key` | | TLS key path |
-| `-allowed-subnet` | | CIDR allowlist (repeatable/comma-separated) |
+| `--host` | `127.0.0.1` | Bind address |
+| `--port` | `8080` | Port |
+| `--base-path` | | URL prefix for reverse-proxy subpath |
+| `--public-url` | | Public-facing URL for proxy access |
+| `--public-origin` | | Trusted browser origin (repeatable/comma-separated) |
+| `--public-port` | `8443` | External port for managed proxy |
+| `--proxy` | | Managed proxy mode (`caddy`) |
+| `--caddy-bin` | `caddy` | Caddy binary path |
+| `--proxy-bind-host` | `0.0.0.0` | Caddy bind address |
+| `--tls-cert` | | TLS certificate path |
+| `--tls-key` | | TLS key path |
+| `--allowed-subnet` | | CIDR allowlist (repeatable/comma-separated) |
 
 The server is read-only — uploads, file watching, and local
 sync are all disabled. Sessions from all machines appear in
@@ -200,7 +200,7 @@ endpoint also accepts `?token=<token>` as a query parameter since
 the `EventSource` API cannot set custom headers.
 
 For LAN access, combine `require_auth = true` with a non-loopback
-bind such as `agentsview pg serve -host 0.0.0.0`, or keep the
+bind such as `agentsview pg serve --host 0.0.0.0`, or keep the
 backend on loopback and expose it through a proxy.
 
 `pg serve` does **not** expose the global live-refresh event stream
@@ -217,8 +217,8 @@ Caddy or an external reverse proxy) to protect tokens in
 transit.
 :::
 
-For managed Caddy mode, keep the backend `-host` on loopback
-and use `-proxy-bind-host` / `-public-port` to expose the
+For managed Caddy mode, keep the backend `--host` on loopback
+and use `--proxy-bind-host` / `--public-port` to expose the
 public listener. The `pg serve` and normal `serve` modes keep
 separate managed-Caddy state, so both can coexist on one host.
 
@@ -239,16 +239,16 @@ agentsview pg serve
 # Team viewer with managed Caddy and TLS
 # Requires require_auth = true in config.toml
 agentsview pg serve \
-  -proxy caddy \
-  -public-url https://viewer.example.com \
-  -public-port 8443 \
-  -tls-cert /path/to/cert.pem \
-  -tls-key /path/to/key.pem
+  --proxy caddy \
+  --public-url https://viewer.example.com \
+  --public-port 8443 \
+  --tls-cert /path/to/cert.pem \
+  --tls-key /path/to/key.pem
 
 # Remote access on a trusted private network (no TLS)
 # Requires require_auth = true; only use behind a VPN or on a
 # private LAN because tokens cross the wire in cleartext.
-agentsview pg serve -host 0.0.0.0 -port 8080
+agentsview pg serve --host 0.0.0.0 --port 8080
 ```
 
 ---
@@ -338,10 +338,10 @@ A typical team setup:
 
 # Team server
 agentsview pg serve \
-  -proxy caddy \
-  -public-url https://viewer.team.internal \
-  -tls-cert /etc/certs/viewer.pem \
-  -tls-key /etc/certs/viewer-key.pem
+  --proxy caddy \
+  --public-url https://viewer.team.internal \
+  --tls-cert /etc/certs/viewer.pem \
+  --tls-key /etc/certs/viewer-key.pem
 ```
 
 ---

@@ -96,7 +96,7 @@ AGENT_VIEWER_DATA_DIR="$DATA_DIR" \
 CLAUDE_PROJECTS_DIR="$EMPTY_DIR" \
 CODEX_SESSIONS_DIR="$EMPTY_DIR" \
 GEMINI_DIR="$EMPTY_DIR" \
-agentsview serve -port "$PORT" &
+agentsview serve --port "$PORT" &
 SERVER_PID=$!
 
 # ── Start agentsview pg serve ────────────────────────────
@@ -110,7 +110,7 @@ allow_insecure = true
 TOML
 
 AGENT_VIEWER_DATA_DIR="$PG_DATA_DIR" \
-agentsview pg serve -port "$PG_PORT" &
+agentsview pg serve --port "$PG_PORT" &
 PG_SERVER_PID=$!
 
 # ── Wait for both servers ────────────────────────────────
