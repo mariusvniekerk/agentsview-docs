@@ -128,7 +128,7 @@ available project names.
 Filtered pushes do not advance the global push watermark
 because it covers all projects. This means the query window
 for subsequent filtered pushes grows over time. Run an
-unfiltered `pg push` (or `pg push -all-projects`)
+unfiltered `pg push` (or `pg push --all-projects`)
 periodically to reset the watermark.
 :::
 
@@ -200,7 +200,7 @@ endpoint also accepts `?token=<token>` as a query parameter since
 the `EventSource` API cannot set custom headers.
 
 For LAN access, combine `require_auth = true` with a non-loopback
-bind such as `agentsview pg serve -host 0.0.0.0`, or keep the
+bind such as `agentsview pg serve --host 0.0.0.0`, or keep the
 backend on loopback and expose it through a proxy.
 
 `pg serve` does **not** expose the global live-refresh event stream
