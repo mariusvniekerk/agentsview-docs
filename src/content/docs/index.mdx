@@ -69,9 +69,9 @@ powershell -ExecutionPolicy ByPass -c "irm https://agentsview.io/install.ps1 | i
 ```
 
 ```bash
-agentsview              # Start server
-agentsview -port 9090   # Custom port
-agentsview -browser     # Open browser on startup
+agentsview serve              # Start server
+agentsview serve -port 9090   # Custom port
+agentsview serve -browser     # Open browser on startup
 ```
 
 :::note
@@ -134,8 +134,9 @@ to a shared database for team or multi-machine setups.
   </Card>
   <Card title="Analyze Your Usage" icon="document">
     Activity heatmaps, tool usage breakdowns, velocity
-    metrics, per-project stats, and session distribution
-    charts. Understand how you use agents over time.
+    metrics, session-health analytics, per-project stats,
+    and session distribution charts. Understand how you use
+    agents over time.
   </Card>
   <Card title="Token Usage & Costs" icon="seti:db">
     A sub-second [`agentsview usage`](/token-usage/) CLI for

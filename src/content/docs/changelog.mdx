@@ -3,6 +3,49 @@ title: Changelog
 description: Release history for AgentsView
 ---
 
+## 0.23.1
+<small>2026-04-19</small>
+
+**Bug fixes**
+
+- Usage reporting excludes cached Codex tokens from `input_tokens`, making token totals more accurate.
+
+---
+
+## 0.23.0
+<small>2026-04-19</small>
+
+**New features**
+
+- Add live dashboard refresh via Server-Sent Events so the Sessions and Usage views update without a full page reload when new sync data lands.
+- Add [session intelligence](/session-intelligence/) with health signals, outcome classification, score/grade badges, a per-session signal panel, and aggregated dashboard health analytics.
+- Add the [`agentsview session`](/session-api/) CLI as a programmatic surface for listing, inspecting, exporting, syncing, and watching session data.
+- Add markdown export for sessions via `/api/v1/sessions/{id}/md`, including optional child-session depth controls.
+- Add SSH remote sync to [`agentsview sync`](/commands/#agentsview-sync) so a local archive can pull session data from a remote machine over SSH.
+- Add PostgreSQL-backed usage reporting so the Usage dashboard and related endpoints work under [`agentsview pg serve`](/pg-sync/).
+- Add [`agentsview stats`](/stats/), an experimental window-scoped reporter for session, git, and outcome activity across the local archive.
+
+**Improvements**
+
+- Require the explicit `serve` subcommand to start the server; plain `agentsview` now shows help.
+- Show session names in the Usage page's Top Sessions by Cost table.
+- Preserve active filters when switching between the Sessions and Usage tabs.
+- Link the Usage page's `Project | Model | Agent` group-by selectors so the chart and attribution panel stay in sync.
+- Make incremental parsing more reliable by validating files with inode and device tracking in addition to size and mtime.
+- Rewrite the project README as a clearer user-facing guide.
+
+**Bug fixes**
+
+- Surface the underlying login-shell probe failure reason for arm64 desktop flake cases instead of hiding the root cause.
+- Only self-heal the frontend events store on transient failures, avoiding permanent retry loops against unsupported event streams.
+- Accept raw session IDs in `agentsview token-use` in addition to canonical stored IDs.
+- Resolve ephemeral `serve` port handling correctly.
+- Parse Claude Code CLI JSON array output correctly in insight generation.
+- Recognize the `"helpful assistant"` prefix as an automated session.
+- Skip git-root walking for foreign-OS working directories.
+
+---
+
 ## 0.22.2
 <small>2026-04-13</small>
 

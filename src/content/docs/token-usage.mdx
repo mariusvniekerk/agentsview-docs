@@ -54,16 +54,27 @@ coverage is ongoing work.
 
 ## Usage Dashboard
 
-The 0.21.0 release adds a dedicated **Usage** page to the web
-UI, reachable from the **Usage** button in the header or
-directly at `/usage`. It's a focused view of cost and token
-totals, driven by the same data the CLI commands read.
+AgentsView includes a dedicated **Usage** page in the web UI,
+reachable from the **Usage** button in the header or directly at
+`/usage`. It's a focused view of cost and token totals, driven by
+the same data the CLI commands read.
 
 ![Token usage dashboard](/screenshots/usage-page.png)
 
 The page is built around four panels: summary cards, a cost
 trend over time, a cost attribution treemap, and a bottom grid
 with top sessions by cost and a cache efficiency breakdown.
+
+In 0.23.0, the page also picks up a few workflow improvements:
+
+- the page refreshes automatically on new sync data in normal
+  `agentsview serve` mode
+- the `Project | Model | Agent` selector is shared between the cost
+  chart and the attribution panel
+- active filters are preserved when switching between the
+  **Sessions** and **Usage** tabs
+- the top-cost sessions table now shows session names instead of
+  only IDs or message previews where available
 
 ### Filters & Date Range
 
@@ -138,6 +149,17 @@ back.
 The dashboard reads from the same `model_pricing` table
 that backs the CLI commands below, so the numbers line up
 exactly with what `agentsview usage daily` prints.
+
+### PostgreSQL-Backed Usage
+
+As of 0.23.0, the Usage page and usage API also work when the UI is
+served from PostgreSQL via [`agentsview pg serve`](/pg-sync/). That
+means shared or multi-machine deployments can browse the same cost
+and token dashboards without relying on a local SQLite archive.
+
+The live SSE refresh path is still specific to the normal local
+`serve` runtime. `pg serve` is read-only and does not expose the
+global live event stream.
 
 ## Quick Tour
 
@@ -419,9 +441,11 @@ include recent activity:
    last recorded sync start time, minus a 10-second safety
    margin to catch files written during the prior sync.
 
-If an `agentsview serve` (or `agentsview pg serve`) process is
-already running, the file watcher already has you covered and
-the on-demand sync is skipped to avoid duplicate work.
+If an `agentsview serve` process is already running, the file
+watcher already has you covered and the on-demand sync is skipped
+to avoid duplicate work. A running `pg serve` process does not keep
+your local SQLite archive fresh, so the CLI still treats the local
+archive as the source of truth for command-line reporting.
 
 Pass `--no-sync` to skip the refresh unconditionally — useful
 for scripting and for prompt modules that must stay snappy.

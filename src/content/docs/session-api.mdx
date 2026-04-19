@@ -1,0 +1,309 @@
+---
+title: Session API
+description: Programmatic access to session data via the agentsview session CLI
+---
+
+The `agentsview session` command group is a stable, programmatic
+surface for reading and writing session data. It is designed for
+shell scripts, automation agents, and CI jobs that need structured
+output rather than the web UI.
+
+When an AgentsView server is running, the CLI proxies all supported
+operations to it over HTTP. When no server is running, it opens the
+local SQLite archive directly and calls the same service functions
+the HTTP handler would have called — so results match regardless of
+transport.
+
+## Stability
+
+- **Additive-only.** New fields may appear at any time. Existing
+  fields are never renamed or removed.
+- **Types are stable.** A field that is a string stays a string.
+- **Unknown fields are safe to ignore.** Well-behaved consumers
+  tolerate forward-compatible additions.
+
+HTTP and CLI share DTOs for bounded responses (same JSON object).
+The CLI `watch` command emits NDJSON whose lines mirror the
+underlying SSE events.
+
+## Transport
+
+Detection uses the existing per-port state file
+`$AGENT_VIEWER_DATA_DIR/server.<port>.json`.
+
+- If a local daemon is running, read and write commands proxy to
+  it over HTTP.
+- If a [`pg serve`](/pg-sync/#agentsview-pg-serve) daemon is
+  running (read-only), read commands proxy to it but
+  `session sync` refuses with a clear error.
+- If both a writable local daemon and a `pg serve` daemon
+  advertise the same data directory, the writable one wins so
+  sync/write operations don't silently land on a read-only
+  target.
+- If no daemon is running, the CLI opens the local archive
+  directly.
+- `session export` always runs locally regardless of daemon
+  state.
+
+When the daemon requires auth (`require_auth: true`), the CLI
+attaches `Authorization: Bearer <token>` to every HTTP request
+using the `auth_token` from the shared config.
+
+## Common flags
+
+| Flag                   | Description                              |
+|------------------------|------------------------------------------|
+| `--format human\|json` | Output format. Default `human`.          |
+| `--server <url>`       | Remote daemon URL (not yet implemented). |
+
+## Commands
+
+### `agentsview session get`
+
+Return session metadata plus computed signal fields. Shape matches
+`GET /api/v1/sessions/{id}`.
+
+```bash
+agentsview session get <id> [--format json]
+```
+
+```json
+{
+  "id": "abc-123",
+  "project": "myapp",
+  "machine": "local",
+  "agent": "claude",
+  "first_message": "...",
+  "display_name": "...",
+  "started_at": "2026-04-18T12:00:00Z",
+  "ended_at": "2026-04-18T13:00:00Z",
+  "message_count": 42,
+  "user_message_count": 7,
+  "health_score": 85,
+  "health_grade": "A",
+  "outcome": "completed",
+  "health_score_basis": ["..."],
+  "health_penalties": {"tool_retries": 5}
+}
+```
+
+`health_score_basis` and `health_penalties` are populated when
+`health_score` is non-null. Both HTTP and CLI surfaces return them.
+
+---
+
+### `agentsview session list`
+
+Filtered session list. Response shape matches
+`GET /api/v1/sessions`.
+
+```bash
+agentsview session list [flags]
+```
+
+```json
+{
+  "sessions": [ ... ],
+  "next_cursor": "...",
+  "total": 42
+}
+```
+
+One-shot and automated sessions are excluded by default. Use the
+`--include-*` flags to opt back in.
+
+| Flag                  | HTTP param          | Notes                             |
+|-----------------------|---------------------|-----------------------------------|
+| `--project`           | `project`           | string                            |
+| `--exclude-project`   | `exclude_project`   | string                            |
+| `--machine`           | `machine`           | string                            |
+| `--agent`             | `agent`             | string                            |
+| `--date`              | `date`              | `YYYY-MM-DD`                      |
+| `--date-from`         | `date_from`         | `YYYY-MM-DD`                      |
+| `--date-to`           | `date_to`           | `YYYY-MM-DD`                      |
+| `--active-since`      | `active_since`      | RFC3339 timestamp                 |
+| `--min-messages`      | `min_messages`      | int                               |
+| `--max-messages`      | `max_messages`      | int                               |
+| `--min-user-messages` | `min_user_messages` | int                               |
+| `--include-one-shot`  | `include_one_shot`  | bool                              |
+| `--include-automated` | `include_automated` | bool                              |
+| `--include-children`  | `include_children`  | bool                              |
+| `--outcome`           | `outcome`           | comma-separated                   |
+| `--health-grade`      | `health_grade`      | comma-separated                   |
+| `--min-tool-failures` | `min_tool_failures` | int; `0` is a meaningful filter   |
+| `--cursor`            | `cursor`            | opaque string from prior response |
+| `--limit`             | `limit`             | int; default 200, max 500         |
+
+---
+
+### `agentsview session messages`
+
+Return a window of messages. Response shape matches
+`GET /api/v1/sessions/{id}/messages`.
+
+```bash
+agentsview session messages <id> [--from N] [--limit N] [--direction asc|desc]
+```
+
+`--from` is pointer-valued at the service layer: omitting it means
+"start at the beginning" for ascending and "start at the newest
+page" for descending; an explicit `--from 0` means "start at ordinal
+0" in both directions. `--direction` is validated to `asc` or `desc`.
+
+```json
+{
+  "messages": [
+    {
+      "ordinal": 0,
+      "role": "user",
+      "content": "...",
+      "thinking_text": "",
+      "timestamp": "2026-04-18T12:00:00Z",
+      "is_system": false,
+      "source_type": "user",
+      "source_subtype": "",
+      "has_thinking": false,
+      "has_tool_use": false
+    }
+  ],
+  "count": 1
+}
+```
+
+`thinking_text` holds the concatenated text of any `thinking` blocks
+the agent emitted, separated from the flattened `content` which
+still contains inline `[Thinking]...[/Thinking]` markers for UI
+rendering.
+
+Promoted `source_subtype` values on `is_system: true` messages:
+`continuation`, `resume`, `interrupted`, `task_notification`,
+`stop_hook`, `compact_boundary`.
+
+---
+
+### `agentsview session tool-calls`
+
+Chronological flattened list of tool invocations.
+
+```bash
+agentsview session tool-calls <id>
+```
+
+```json
+{
+  "tool_calls": [
+    {
+      "ordinal": 3,
+      "timestamp": "2026-04-18T12:05:00Z",
+      "tool_use_id": "toolu_01abc...",
+      "tool_name": "Bash",
+      "category": "Bash",
+      "input_json": "{\"command\":\"ls\"}",
+      "skill_name": "",
+      "subagent_session_id": "",
+      "result_length": 128
+    }
+  ],
+  "count": 1
+}
+```
+
+`input_json` is a string — usually a serialized JSON object but may
+be a plain string (e.g. `"echo hello world"` from Codex).
+
+---
+
+### `agentsview session export`
+
+Stream the raw session source file to stdout. This is a
+**local-only** filesystem helper: the source file path is resolved
+from the local SQLite archive, never from any daemon. Both
+`--server` and `--format` are rejected with an error — the command
+streams raw bytes, so structured-output flags don't apply.
+
+```bash
+agentsview session export <id>
+```
+
+Exit states:
+
+| State                                  | Behavior                                                  |
+|----------------------------------------|-----------------------------------------------------------|
+| Session in local archive, file on disk | Streams bytes verbatim                                    |
+| Session in local archive, file missing | Exit 1: error prefixed `source file not found`            |
+| Session in local archive, path empty   | Exit 1: `source file not found for session <id>`          |
+| Session not in local archive           | Exit 1: `session not in local archive: <id>`              |
+
+For a DB-derived export (HTML or markdown) use the HTTP endpoints
+`/api/v1/sessions/{id}/export` or `/api/v1/sessions/{id}/md`.
+
+Markdown export accepts an optional `depth` query parameter:
+
+- omitted: root session only
+- `depth=1`: include direct child/subagent sessions
+- `depth=all`: recurse through the child-session tree
+
+Any other `depth` value is rejected.
+
+---
+
+### `agentsview session sync`
+
+Parse and insert a single session. Blocks until indexing and signal
+computation complete. JSON output is the `SessionDetail` of the
+synced session; human output is one line: `synced: <id>`.
+
+```bash
+agentsview session sync <path-or-id>
+```
+
+Argument resolution: if the argument is an existing filesystem
+path, it is treated as a raw JSONL file to parse. Otherwise it is
+treated as a session ID for re-parse.
+
+When a single JSONL maps to more than one session (for example a
+Claude transcript with forked/resumed branches), `session sync
+<path>` refuses with an error that lists every candidate id. The
+contract is "one session in, one `SessionDetail` back", so the CLI
+never picks arbitrarily.
+
+At that point the file has already been parsed and every candidate
+session written to the local archive — the ambiguity check runs
+after the sync engine finishes. Re-run `session sync <id>` with the
+specific session you want; the `<id>` form resolves the file path
+from the archive, so it only works for sessions already present
+there.
+
+- If a local daemon is running, syncs proxy to
+  `POST /api/v1/sessions/sync` to avoid racing signal computation.
+- If a [`pg serve`](/pg-sync/#agentsview-pg-serve) daemon is
+  running (read-only), sync refuses with a clear error.
+- If no daemon is running, the CLI runs the sync in-process.
+
+---
+
+### `agentsview session watch`
+
+Stream NDJSON events as the session updates. Each line is a small
+object that wraps an SSE event.
+
+```bash
+agentsview session watch <id>
+```
+
+```
+{"event":"session_updated","data":"abc-123"}
+{"event":"heartbeat","data":"2026-04-18T12:05:00Z"}
+```
+
+Recognized `event` values today: `session_updated`, `heartbeat`.
+New events may be added; consumers should ignore unknown events.
+The command runs until interrupted (Ctrl+C) or the context is
+cancelled.
+
+Watch validates the session id before opening the stream. An
+unknown id fails fast with a `watch: session not found: <id>`
+error and non-zero exit instead of producing an indefinite
+heartbeat stream — typos in automation scripts surface immediately.
+When proxied to a daemon, the same condition surfaces as HTTP 404
+at the transport layer before being translated to the CLI error.

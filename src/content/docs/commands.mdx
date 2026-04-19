@@ -5,14 +5,17 @@ description: All AgentsView commands, flags, and environment variables
 
 ## Commands
 
-### `agentsview` / `agentsview serve`
+### `agentsview serve`
 
 Start the HTTP server with embedded web UI.
 
 ```bash
-agentsview [flags]
 agentsview serve [flags]
 ```
+
+As of 0.23.0, starting the server requires the explicit
+`serve` subcommand. Running plain `agentsview` shows help
+instead of starting the web UI.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -37,10 +40,10 @@ access and proxy flags.
 **Examples:**
 
 ```bash
-agentsview                          # defaults
-agentsview -port 9090               # custom port
-agentsview -browser                 # open browser on startup
-agentsview -public-url https://agents.example.com  # remote access
+agentsview serve                                # defaults
+agentsview serve -port 9090                     # custom port
+agentsview serve -browser                       # open browser on startup
+agentsview serve -public-url https://agents.example.com
 ```
 
 On startup, the server:
@@ -69,16 +72,26 @@ agentsview sync [flags]
 | Flag | Default | Description |
 |------|---------|-------------|
 | `-full` | `false` | Force a full resync regardless of data version |
+| `-host` | | SSH hostname for remote sync |
+| `-user` | | SSH username for remote sync |
+| `-port` | `22` | SSH port for remote sync |
 
 **Examples:**
 
 ```bash
 agentsview sync          # incremental sync and exit
 agentsview sync -full    # full resync and exit
+agentsview sync -host buildbox.local
+agentsview sync -host buildbox.local -user wes -port 2222
 ```
 
 After syncing, a summary of session and message counts is printed
 to stdout.
+
+When `-host` is set, AgentsView performs a remote sync over SSH:
+it resolves the supported agent session directories on the remote
+machine, transfers the source session data locally, and indexes it
+into your local archive.
 
 ---
 
@@ -131,7 +144,7 @@ agentsview version
 ```
 
 ```
-agentsview v0.1.0 (abc1234) built 2025-01-15
+agentsview 0.23.0 (commit d49f1a9, built 2026-04-19)
 ```
 
 ---
@@ -214,6 +227,10 @@ root sessions usually use UUIDs like
 `550e8400-e29b-41d4-a716-446655440000`, Claude subagents use
 IDs like `agent-a86574e`, and some other agents use prefixes
 such as `codex:my-session-id`.
+
+As of 0.23.0, `token-use` also accepts raw session IDs emitted by
+the underlying agent when AgentsView can resolve them back to the
+canonical stored session.
 
 If the AgentsView server is already running, the command reads the
 current database state. If no server is running, it performs an
@@ -313,6 +330,69 @@ agentsview projects -json    # JSON array
 
 ---
 
+### `agentsview health`
+
+Inspect session intelligence in a human-friendly CLI view. See
+[Session Intelligence](/session-intelligence/) for the scoring and
+signal model.
+
+```bash
+agentsview health [session-id] [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--json` | `false` | Output JSON instead of terminal text |
+| `--limit` | `20` | Number of sessions to list when no session ID is given |
+
+**Examples:**
+
+```bash
+agentsview health
+agentsview health --limit 50
+agentsview health 550e8400-e29b-41d4-a716-446655440000
+agentsview health agent-a86574e --json
+```
+
+Without a session ID, the command lists recent sessions with grade
+and outcome columns. With a session ID, it prints the detailed
+signal counts for that session.
+
+---
+
+### `agentsview stats`
+
+Experimental window-scoped workspace analytics across sessions and
+git activity. See [Stats](/stats/) for the full write-up.
+
+```bash
+agentsview stats [flags]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--format` | `human` | Output format: `human` or `json` |
+| `--since` | `28d` | Start of window, either `YYYY-MM-DD` or a compact duration like `28d` |
+| `--until` | | End of window as `YYYY-MM-DD` |
+| `--agent` | `all` | Restrict to one agent or use `all` |
+| `--include-project` | | Repeatable project allowlist |
+| `--exclude-project` | | Repeatable project blocklist |
+| `--timezone` | local | Timezone used for temporal reporting |
+
+**Examples:**
+
+```bash
+agentsview stats
+agentsview stats --format json --since 2026-04-01 --until 2026-04-15
+agentsview stats --agent claude --include-project agentsview
+```
+
+The command is experimental. The exact human output may change, and
+the JSON output should be treated as a moving surface even though it
+currently carries `schema_version: 1`.
+
+---
+
 ### `agentsview import`
 
 Import Claude.ai or ChatGPT conversations into the local
@@ -338,6 +418,30 @@ agentsview import --type claude-ai ~/Downloads/claude.zip
 agentsview import --type chatgpt ~/Downloads/chatgpt.zip
 agentsview import --type claude-ai ./conversations.json
 ```
+
+---
+
+### `agentsview session`
+
+Programmatic access to session data for scripts, automation
+agents, and CI jobs. See [Session API](/session-api/) for full
+documentation, including stability guarantees, transport
+auto-detection, and every subcommand.
+
+```bash
+agentsview session get <id>              # metadata + signals
+agentsview session list [flags]          # filtered list
+agentsview session messages <id>         # paginated messages
+agentsview session tool-calls <id>       # flat tool-call list
+agentsview session export <id>           # stream raw source file
+agentsview session sync <path-or-id>     # parse + insert
+agentsview session watch <id>            # NDJSON event stream
+```
+
+Use [`agentsview health`](#agentsview-health) for a human-first
+signal view and [Session API](/session-api/) for the full
+programmatic contract, including transport behavior and markdown
+export details.
 
 ---
 
@@ -377,11 +481,12 @@ agentsview help
 | `AGENTSVIEW_PG_URL` | | PostgreSQL connection URL |
 | `AGENTSVIEW_PG_MACHINE` | | Machine name for PG push sync |
 | `AGENTSVIEW_PG_SCHEMA` | `agentsview` | PostgreSQL schema name |
+| `AGENTSVIEW_GITHUB_TOKEN` | | GitHub token used by `agentsview stats` for PR aggregation |
 | `AGENTSVIEW_DISABLE_UPDATE_CHECK` | | Set to `1` to disable the update check |
 
 Environment variables override the built-in defaults. Set them
 in your shell profile or pass them inline:
 
 ```bash
-AGENT_VIEWER_DATA_DIR=/tmp/av-test agentsview
+AGENT_VIEWER_DATA_DIR=/tmp/av-test agentsview serve
 ```

@@ -30,6 +30,7 @@ on first run (the JSON file is renamed to `config.json.bak`).
 ```toml
 cursor_secret = "base64-encoded-secret"
 github_token = "ghp_xxxxx"
+require_auth = true
 ```
 
 | Field | Description |
@@ -37,7 +38,7 @@ github_token = "ghp_xxxxx"
 | `cursor_secret` | Auto-generated HMAC key for pagination cursor signing |
 | `github_token` | GitHub personal access token for Gist publishing |
 | `result_content_blocked_categories` | Tool categories whose result content is not stored (default: `["Read", "Glob"]`) |
-| `remote_access` | Enable remote connections — auto-binds to `0.0.0.0` and requires bearer token auth |
+| `require_auth` | Require bearer-token authentication for API access |
 | `auth_token` | Auto-generated 256-bit bearer token for remote access |
 | `public_url` | Public URL for hostname/proxy access and origin validation |
 | `public_origins` | Array of additional trusted CORS origins |
@@ -50,6 +51,12 @@ The `github_token` can be set via the web UI Settings page or
 the API endpoint `POST /api/v1/config/github`. Remote access
 fields can be configured via the Settings page or CLI flags —
 see [Remote Access](/remote-access/) for details.
+
+:::note
+Older configs may still contain `remote_access = true`. AgentsView
+still reads that legacy key for backward compatibility, but new
+setups should use `require_auth = true`.
+:::
 
 ## Session Discovery
 
@@ -219,9 +226,9 @@ two mechanisms:
 2. **Periodic sync** — full directory scan every 15 minutes
    as a safety net
 
-Change detection uses file size and mtime comparison to skip
-unchanged files. A pool of 8 workers processes files in
-parallel during sync.
+Change detection uses file size, mtime, inode, and device
+tracking to validate incremental parses more reliably. A pool of
+8 workers processes files in parallel during sync.
 
 Files that fail to parse or contain no interactive content
 are cached in the `skipped_files` table and skipped on
@@ -238,7 +245,7 @@ curl -X POST http://127.0.0.1:8080/api/v1/sync
 Trigger a full resync (re-parses all session files from scratch):
 
 ```bash
-curl http://127.0.0.1:8080/api/trigger-resync
+curl -X POST http://127.0.0.1:8080/api/v1/resync
 ```
 
 Both endpoints stream progress via Server-Sent Events when

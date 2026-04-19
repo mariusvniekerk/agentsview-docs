@@ -1088,6 +1088,120 @@ test.describe('Activity minimap', () => {
   });
 });
 
+// ── Session intelligence ────────────────────────────────
+
+test.describe('Session intelligence', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+  });
+
+  // Walks through the sidebar until it finds a session whose
+  // header renders a `.grade-badge`. Sessions without scored
+  // signals don't render the badge at all, so we can't rely on
+  // `selectRichSession` here.
+  async function selectGradedSession(page: Page) {
+    const items = page.locator('.session-item');
+    const total = await items.count();
+    const limit = Math.min(total, 25);
+    for (let i = 0; i < limit; i++) {
+      await items.nth(i).click();
+      await page.waitForSelector('.message', { timeout: 10_000 });
+      await page.waitForTimeout(400);
+      const badge = page.locator('.grade-badge');
+      if (
+        (await badge.count()) > 0 &&
+        (await badge.first().isVisible())
+      ) {
+        return;
+      }
+    }
+    throw new Error(
+      `no session with a .grade-badge found in first ${limit} items`,
+    );
+  }
+
+  // Same as `selectGradedSession` but requires the opened signal
+  // panel to render `.penalty` chips. Panels with no penalties are
+  // valid but make a duller screenshot, so we prefer a session
+  // whose panel actually exercises the penalty-chip layout. Falls
+  // back to any graded session if no session in the scan window
+  // has penalties.
+  async function openSignalPanelWithPenalties(page: Page) {
+    const items = page.locator('.session-item');
+    const total = await items.count();
+    const limit = Math.min(total, 30);
+    let firstGradedIdx = -1;
+    for (let i = 0; i < limit; i++) {
+      await items.nth(i).click();
+      await page.waitForSelector('.message', { timeout: 10_000 });
+      await page.waitForTimeout(300);
+      const badge = page.locator('.grade-badge').first();
+      if (!(await badge.count()) || !(await badge.isVisible())) {
+        continue;
+      }
+      if (firstGradedIdx < 0) firstGradedIdx = i;
+      await badge.click();
+      const panel = page.locator('.signal-panel');
+      await expect(panel).toBeVisible({ timeout: 3_000 });
+      await page.waitForTimeout(200);
+      if ((await panel.locator('.penalty').count()) > 0) {
+        return;
+      }
+      await badge.click(); // close and move on
+      await page.waitForTimeout(100);
+    }
+    if (firstGradedIdx < 0) {
+      throw new Error('no graded session found in scan window');
+    }
+    // Fall back to the first graded session we saw.
+    await items.nth(firstGradedIdx).click();
+    await page.waitForSelector('.message', { timeout: 10_000 });
+    await page.waitForTimeout(300);
+    await page.locator('.grade-badge').first().click();
+    await expect(page.locator('.signal-panel')).toBeVisible({
+      timeout: 3_000,
+    });
+    await page.waitForTimeout(200);
+  }
+
+  test('grade badge in session header', async ({ page }) => {
+    await selectGradedSession(page);
+    // Capture the breadcrumb row so the badge is shown in context
+    // alongside the session title and action buttons.
+    const breadcrumb = page.locator('.session-breadcrumb').first();
+    await snapEl(breadcrumb, 'grade-badge');
+  });
+
+  test('signal panel dropdown', async ({ page }) => {
+    await openSignalPanelWithPenalties(page);
+
+    const panel = page.locator('.signal-panel');
+    await snapEl(panel, 'signal-panel');
+
+    // Toggle off to leave the UI clean for later tests.
+    await page.locator('.grade-badge').first().click();
+  });
+});
+
+// ── Dashboard session health section ────────────────────
+
+test.describe('Dashboard session health', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize(FULL);
+    await waitForApp(page);
+    await setDateRange1Y(page);
+  });
+
+  test('session health section', async ({ page }) => {
+    const section = page.locator('.health-section');
+    await expect(section).toBeVisible({ timeout: 10_000 });
+    await section.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(800);
+    await snapEl(section, 'session-health');
+  });
+});
+
 // ── Usage dashboard (token usage & cost) ────────────────
 
 test.describe('Usage dashboard', () => {

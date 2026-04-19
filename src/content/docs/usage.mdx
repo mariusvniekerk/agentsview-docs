@@ -33,6 +33,11 @@ The dashboard header includes:
 The status bar at the bottom shows session count, message count,
 project count, last sync time, and the build version.
 
+On the normal local `agentsview serve` runtime, the dashboard and
+the Usage page also refresh automatically when new sync data lands.
+AgentsView listens to a global SSE event stream and refetches the
+affected data instead of forcing you to reload the page manually.
+
 ### Summary Cards
 
 Six cards at the top of the dashboard show key metrics for the
@@ -143,6 +148,27 @@ messages, average response time, tool usage patterns, and
 concentration metrics.
 
 ![Agent comparison](/screenshots/agent-comparison.png)
+
+### Session Health
+
+The 0.23.0 dashboard adds a **Session Health** section that rolls up
+the new session-intelligence signals. It shows:
+
+- average health score and derived grade
+- headline counts for the `completed` and `errored` outcomes
+  (`abandoned` and `unknown` sessions are not counted here, but are
+  visible in the dashboard's outcome-distribution chart alongside
+  them)
+- tool-failure rate and sessions with failures
+- compaction counts, including mid-task compactions
+- score trend over time
+- by-agent and by-project score tables
+
+![Session Health section on the dashboard](/screenshots/session-health.png)
+
+See [Session Intelligence](/session-intelligence/#outcome-classification)
+for the full four-outcome model that both this section and
+`agentsview stats` derive from.
 
 ### CSV Export
 
@@ -258,6 +284,10 @@ to reset all filters at once.
 Filter state syncs between the session sidebar and the analytics
 dashboard — applying a filter in one updates the other.
 
+As of 0.23.0, those active filters are also preserved when you
+switch between the **Sessions** and **Usage** tabs, so you can move
+between browsing and cost analysis without rebuilding the same view.
+
 ### Direct Session Links
 
 Each session has a shareable URL. Click the session ID in the
@@ -297,9 +327,10 @@ rendering for large sessions.
 
 ![Message viewer](/screenshots/message-viewer.png)
 
-The session detail header shows the session name, agent, project,
-and a copyable **Session ID**. Click the ID to copy it to the
-clipboard for sharing or lookup.
+The session detail header shows the session name, agent, project, a
+health grade badge, and a copyable **Session ID**. Click the ID to
+copy it to the clipboard for sharing or lookup. Click the grade
+badge to toggle the signal panel.
 
 ### Message Layouts
 
@@ -451,6 +482,22 @@ all sessions, see the
 [`agentsview usage daily`](/commands/#agentsview-usage-daily)
 CLI command.
 
+### Signal Panel
+
+Click the health grade badge in the session header to open the
+signal panel for the current session. The panel shows:
+
+- grade and numeric score
+- outcome icon and confidence
+- basis tags showing whether outcome, tool health, and context
+  pressure contributed to the score
+- compaction summary, including mid-task compactions
+- penalty chips for the deductions that were applied
+
+When a session does not have enough usable data, the panel shows a
+small empty state instead of a score. See
+[Session Intelligence](/session-intelligence/) for the full model.
+
 ### Activity Minimap
 
 Click the minimap button in the session header to open a
@@ -598,9 +645,15 @@ without manually navigating to the project directory.
 
 ## Session Export
 
-Press `e` or click the export button to download the current
-session as a standalone HTML file. The exported file includes
-styled message rendering and works offline.
+Press `e` or open the export menu in the header to download the
+current session as a standalone HTML file. The exported file
+includes styled message rendering and works offline.
+
+The same menu also includes **Copy markdown export link**, which
+copies a URL for the session's markdown export endpoint. That link
+can be used in scripts, notes, or shared internal tooling when you
+want a text-oriented representation instead of the standalone HTML
+export.
 
 ---
 

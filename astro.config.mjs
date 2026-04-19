@@ -83,10 +83,13 @@ export default defineConfig({
       sidebar: [
         { label: 'Quick Start', slug: 'quickstart' },
         { label: 'Usage Guide', slug: 'usage' },
+        { label: 'Session Intelligence', slug: 'session-intelligence' },
         { label: 'Token Usage & Costs', slug: 'token-usage' },
         { label: 'Chat Import', slug: 'chat-import' },
         { label: 'Session Insights', slug: 'insights' },
         { label: 'CLI Reference', slug: 'commands' },
+        { label: 'Stats', slug: 'stats' },
+        { label: 'Session API', slug: 'session-api' },
         { label: 'Configuration', slug: 'configuration' },
         { label: 'Remote Access', slug: 'remote-access' },
         { label: 'PostgreSQL Sync', slug: 'pg-sync' },

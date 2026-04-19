@@ -3,90 +3,90 @@ title: Remote Access
 description: Access AgentsView from other devices on your network
 ---
 
-AgentsView runs locally by default, binding to `127.0.0.1` so only
-your machine can reach it. Remote access lets you open the UI from
-other devices — a phone, tablet, or another computer on your
-network — while keeping the server and data on your machine.
+AgentsView binds to `127.0.0.1` by default, so only your local
+machine can reach it. To make the UI available from other devices,
+you need to do two things:
+
+- listen on a non-loopback address or put the server behind a proxy
+- require a bearer token for API access
+
+In current releases, bearer-token auth is controlled by
+`require_auth`.
 
 ## Quick Setup
 
-Enable remote access in `config.toml`:
+Enable auth in `~/.agentsview/config.toml`:
 
 ```toml
-remote_access = true
+require_auth = true
 ```
 
-Then start the server:
+Then start the server on a non-loopback interface:
 
 ```bash
-agentsview
+agentsview serve -host 0.0.0.0
 ```
 
-When `remote_access` is true and no explicit `-host` is given,
-the server automatically binds to `0.0.0.0`. A 256-bit bearer
-token is generated and printed to the console on first start:
+When auth is enabled, AgentsView generates a token if needed and
+prints it on startup:
 
 ```
-Remote access enabled. Auth token: <token>
+Auth enabled. Token: <token>
 ```
 
-Open `http://<your-ip>:8080` from another device and pass the
-token in the `Authorization` header or configure it in the
-Settings page.
+Open `http://<your-ip>:8080` from another device and configure the
+token in the frontend, or send it in an `Authorization` header.
 
-You can also enable remote access from the Settings page in
-the web UI without editing `config.toml` directly.
+:::note
+Older configs may still use `remote_access = true`. AgentsView
+still reads that legacy key, but new setups should use
+`require_auth = true`.
+:::
 
 ## Authentication
 
-Remote access uses bearer token authentication. When
-`remote_access` is enabled, a cryptographically random token
-is auto-generated and stored in `config.toml`. All API
-requests must include it:
+When `require_auth` is enabled, all `/api/` requests must include:
 
 ```
 Authorization: Bearer <token>
 ```
 
-The token is generated automatically on first enable — you
-don't need to create one manually. It's printed to the console
-on startup and visible in the Settings page (localhost only).
+The token is stored in `config.toml` as `auth_token`. It is
+generated automatically the first time auth is enabled, so you do
+not need to mint one manually.
 
-:::caution
-When `remote_access` is true but no token is configured,
-all requests are rejected with 403 Forbidden. The token is
-auto-generated on first run, so this only occurs if it was
-manually removed from the config.
-:::
+Auth is enforced on API routes, not on static assets. That means a
+browser can load the HTML shell, but API requests fail with `401`
+until the correct token is supplied.
 
-Localhost requests (`127.0.0.0/8`, `::1`) bypass authentication
-when `remote_access` is false (the default).
+When `require_auth` is disabled, normal local loopback use remains
+ungated.
 
-### SSE Watch Endpoint
+## SSE Endpoints
 
-The Server-Sent Events endpoint (`/watch`) accepts the token
-as a query parameter since the `EventSource` API cannot set
-custom headers:
+The SSE endpoints also accept `?token=<token>` because browser
+`EventSource` cannot set custom headers:
 
-```
-http://<host>:8080/watch?token=<token>
+```text
+http://<host>:8080/api/v1/events?token=<token>
+http://<host>:8080/api/v1/sessions/<id>/watch?token=<token>
 ```
 
-## Public URL and Trusted Origins
+Use header-based auth for normal API calls whenever possible.
 
-When running behind a reverse proxy or accessing via a hostname,
-tell AgentsView about the public URL so host and origin
-validation work correctly:
+## Public URL And Trusted Origins
+
+When you access AgentsView through a hostname or reverse proxy,
+tell the server about the public URL:
 
 ```bash
-agentsview -public-url https://agents.example.com
+agentsview serve -public-url https://agents.example.com
 ```
 
-For additional trusted origins (e.g. multiple domains or a
-development proxy), use `-public-origin`:
+For additional trusted origins, use `-public-origin`:
 
 ```bash
-agentsview \
+agentsview serve \
   -public-origin https://agents.example.com \
   -public-origin https://internal.example.com
 ```
@@ -94,10 +94,10 @@ agentsview \
 Flags can also be comma-separated:
 
 ```bash
-agentsview -public-origin https://a.example.com,https://b.example.com
+agentsview serve -public-origin https://a.example.com,https://b.example.com
 ```
 
-These can be set in `config.toml`:
+These can also be persisted:
 
 ```toml
 public_url = "https://agents.example.com"
@@ -107,18 +107,21 @@ public_origins = [
 ]
 ```
 
-The server derives trusted `Host` and `Origin` values from
-these inputs rather than weakening protections globally.
-
 ## Managed Caddy Mode
 
-For TLS-terminated access, AgentsView can manage a
-[Caddy](https://caddyserver.com) reverse proxy as a subprocess.
-The backend stays on loopback while Caddy handles the
-public-facing socket.
+AgentsView can manage a [Caddy](https://caddyserver.com) reverse
+proxy for TLS-terminated access. The AgentsView backend stays on
+loopback while Caddy handles the public socket.
+
+:::caution[Enable auth first]
+Managed Caddy exposes a public endpoint. Set `require_auth = true`
+in `~/.agentsview/config.toml` before starting the server, or the
+proxy will front an unauthenticated API. See [Quick
+Setup](#quick-setup).
+:::
 
 ```bash
-agentsview \
+agentsview serve \
   -public-url https://agents.example.com \
   -proxy caddy \
   -tls-cert /path/to/cert.pem \
@@ -135,58 +138,45 @@ agentsview \
 | `-tls-key` | | TLS key file path |
 | `-allowed-subnet` | | Client CIDR allowlist (repeatable or comma-separated) |
 
-Caddy must be installed and available on `PATH` (or specify
-the path with `-caddy-bin`). AgentsView generates the
-Caddyfile automatically — no manual Caddy configuration is needed.
-
-### How It Works
-
-1. AgentsView starts the HTTP server on loopback (`-host`/`-port`)
-2. A Caddyfile is generated under `~/.agentsview/managed-caddy/`
-3. Caddy validates the config, then starts as a managed subprocess
-4. Caddy binds to `-proxy-bind-host` on `-public-port` and
-   reverse-proxies to the loopback backend
-5. When AgentsView shuts down, Caddy is stopped automatically
+Caddy must already be installed and available on `PATH` unless you
+override it with `-caddy-bin`.
 
 ### Subnet Allowlists
 
-When using a non-loopback bind host for Caddy, restrict access
-to specific networks:
+When using a non-loopback bind host for Caddy, restrict access to
+specific networks. Subnet allowlists complement bearer-token auth
+rather than replacing it — `require_auth = true` should still be
+set before binding Caddy off loopback.
 
 ```bash
-agentsview \
+agentsview serve \
   -proxy caddy \
   -proxy-bind-host 0.0.0.0 \
   -allowed-subnet 192.168.1.0/24 \
   -allowed-subnet 10.0.0.0/8
 ```
 
-Requests from outside the allowed subnets receive a 403
-response. At least one subnet must be specified when binding
-Caddy to a non-loopback interface.
-
-Shorthand notation is normalized: `10.0/16` becomes
-`10.0.0.0/16`.
+Requests from outside the allowed subnets receive `403`.
 
 ## Settings Page
 
-Remote access can be configured from the Settings page
-in the web UI. The **Remote Access** section lets you:
+Remote access can also be configured from the Settings page. The
+**Remote Access** section lets you:
 
-- Toggle **Allow remote connections** on or off
-- View the auto-generated auth token (with copy button)
-- Connect the frontend to a remote AgentsView server by
-  entering its URL and auth token
+- toggle `require_auth`
+- view the auto-generated auth token
+- connect the frontend to another AgentsView server by URL and token
 
 ![Settings remote access](/screenshots/settings-remote.png)
 
-Changes that require a server restart (like toggling remote
-access) are noted in the UI.
+Changes that affect bind or auth behavior may require a server
+restart.
 
 ## CLI Flags Reference
 
 | Flag | Default | Description |
 |------|---------|-------------|
+| `-host` | `127.0.0.1` | Interface to bind |
 | `-public-url` | | Public URL for hostname or proxy access |
 | `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
 | `-proxy` | | Managed proxy mode (`caddy`) |
@@ -199,10 +189,10 @@ access) are noted in the UI.
 
 ## Config File Reference
 
-Remote access fields in `~/.agentsview/config.toml`:
+Remote-access-related fields in `~/.agentsview/config.toml`:
 
 ```toml
-remote_access = true
+require_auth = true
 auth_token = "auto-generated-base64-token"
 public_url = "https://agents.example.com"
 public_origins = ["https://agents.example.com"]
@@ -219,7 +209,7 @@ allowed_subnets = ["192.168.1.0/24"]
 
 | Field | Description |
 |-------|-------------|
-| `remote_access` | Enable remote connections (auto-binds to `0.0.0.0`) |
+| `require_auth` | Require bearer-token authentication for API access |
 | `auth_token` | Auto-generated 256-bit bearer token |
 | `public_url` | Public URL for host/origin validation |
 | `public_origins` | Additional trusted CORS origins |
@@ -231,5 +221,6 @@ allowed_subnets = ["192.168.1.0/24"]
 | `proxy.tls_key` | TLS key path |
 | `proxy.allowed_subnets` | CIDR allowlist for proxy connections |
 
-The config file is written with `0600` permissions (owner
-read/write only).
+For LAN access you still need a non-loopback bind such as
+`agentsview serve -host 0.0.0.0`. `require_auth` controls API
+auth; it does not change the bind address by itself.

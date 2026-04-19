@@ -10,6 +10,8 @@ for team dashboards or multi-machine setups.
 
 The sync direction is one-way: SQLite to PostgreSQL. Each machine
 pushes its own sessions; `pg serve` reads from the shared database.
+The resulting UI includes the session browser, analytics dashboard,
+search, and, as of 0.23.0, the Usage dashboard as well.
 
 ## Quick Start
 
@@ -179,7 +181,9 @@ agentsview pg serve [flags]
 
 The server is read-only — uploads, file watching, and local
 sync are all disabled. Sessions from all machines appear in
-a single unified view.
+a single unified view. The same deployment also serves the
+analytics dashboard and the Usage page from PostgreSQL-backed
+queries.
 
 On startup, `pg serve` automatically applies any pending
 schema migrations to PostgreSQL, creating new tables and
@@ -189,12 +193,21 @@ an upgrade. If the PostgreSQL role is read-only, the
 migration is skipped and the server falls back to the
 schema compatibility check.
 
-When binding to a non-loopback address, auth is enabled
-automatically. A bearer token is generated and printed on
-startup. Pass it via `Authorization: Bearer <token>` header.
-The SSE watch endpoint also accepts `?token=<token>` as a
-query parameter since the `EventSource` API cannot set custom
-headers.
+When `require_auth` is enabled, a bearer token is generated if
+needed and printed on startup. Pass it via
+`Authorization: Bearer <token>` on API requests. The SSE watch
+endpoint also accepts `?token=<token>` as a query parameter since
+the `EventSource` API cannot set custom headers.
+
+For LAN access, combine `require_auth = true` with a non-loopback
+bind such as `agentsview pg serve -host 0.0.0.0`, or keep the
+backend on loopback and expose it through a proxy.
+
+`pg serve` does **not** expose the global live-refresh event stream
+used by normal `agentsview serve`, because there is no local sync
+engine attached to the server. The session browser, analytics, and
+usage views still work normally; they are just not auto-refreshed by
+the global SSE path.
 
 :::caution
 Query-parameter tokens can leak through server logs, browser
@@ -211,11 +224,20 @@ separate managed-Caddy state, so both can coexist on one host.
 
 **Examples:**
 
+:::caution[Enable auth before exposing `pg serve`]
+Only the loopback example below is safe without auth. Every other
+example binds off `127.0.0.1` or fronts a public proxy, so set
+`require_auth = true` in `~/.agentsview/config.toml` before
+starting the server. The same bearer-token mechanism described in
+[Remote Access](/remote-access/#authentication) applies.
+:::
+
 ```bash
-# Local development — loopback, no auth
+# Local development — loopback, no auth required
 agentsview pg serve
 
 # Team viewer with managed Caddy and TLS
+# Requires require_auth = true in config.toml
 agentsview pg serve \
   -proxy caddy \
   -public-url https://viewer.example.com \
@@ -224,8 +246,8 @@ agentsview pg serve \
   -tls-key /path/to/key.pem
 
 # Remote access on a trusted private network (no TLS)
-# Only use this behind a VPN or on a private LAN —
-# tokens are sent in cleartext over plain HTTP.
+# Requires require_auth = true; only use behind a VPN or on a
+# private LAN because tokens cross the wire in cleartext.
 agentsview pg serve -host 0.0.0.0 -port 8080
 ```
 

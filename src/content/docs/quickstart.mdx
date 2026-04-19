@@ -68,7 +68,7 @@ The desktop app handles startup automatically — just open
 the app. CLI users start the server manually:
 
 ```bash
-agentsview
+agentsview serve
 ```
 
 This will:
@@ -86,9 +86,9 @@ Open `http://127.0.0.1:8080` in your browser, or pass
 Override the default port or host:
 
 ```bash
-agentsview -port 9090
-agentsview -host 0.0.0.0 -port 3000
-agentsview -browser
+agentsview serve -port 9090
+agentsview serve -host 0.0.0.0 -port 3000
+agentsview serve -browser
 ```
 
 Point to custom session directories with environment variables:
@@ -112,7 +112,7 @@ export HERMES_SESSIONS_DIR=~/custom/hermes
 export CORTEX_DIR=~/custom/cortex
 export KIRO_SESSIONS_DIR=~/custom/kiro
 export KIRO_IDE_DIR=~/custom/kiro-ide
-agentsview
+agentsview serve
 ```
 
 ## What You'll See
@@ -121,6 +121,7 @@ Once running, the web UI provides:
 
 - **Session list** with filtering by project, agent, date, and message count
 - **Message viewer** with full content, tool calls, and thinking blocks
+- **Session intelligence** with health grades, outcomes, and signal panels
 - **Full-text search** across all message content
 - **Analytics** including activity heatmaps, tool usage, and velocity charts
-- **Session export** to standalone HTML or GitHub Gist
+- **Session export** to standalone HTML, markdown export links, or GitHub Gist

@@ -89,12 +89,14 @@ GEMINI_DIR="$EMPTY_DIR" \
 agentsview usage daily --offline --no-sync > /dev/null
 
 # ── Start agentsview (SQLite mode) ───────────────────────
+# 0.23.0 requires the explicit `serve` subcommand; plain
+# `agentsview` now prints help instead of starting the server.
 echo "Starting agentsview on port $PORT..."
 AGENT_VIEWER_DATA_DIR="$DATA_DIR" \
 CLAUDE_PROJECTS_DIR="$EMPTY_DIR" \
 CODEX_SESSIONS_DIR="$EMPTY_DIR" \
 GEMINI_DIR="$EMPTY_DIR" \
-agentsview -port "$PORT" &
+agentsview serve -port "$PORT" &
 SERVER_PID=$!
 
 # ── Start agentsview pg serve ────────────────────────────
