@@ -78,17 +78,17 @@ This will:
 3. Start watching session directories for changes
 4. Launch the web UI at `http://127.0.0.1:8080`
 
-Open `http://127.0.0.1:8080` in your browser, or pass
-`-browser` to open it automatically.
+Open `http://127.0.0.1:8080` in your browser. Pass
+`--no-browser` to disable automatic browser launch.
 
 ## Customize
 
 Override the default port or host:
 
 ```bash
-agentsview serve -port 9090
-agentsview serve -host 0.0.0.0 -port 3000
-agentsview serve -browser
+agentsview serve --port 9090
+agentsview serve --host 0.0.0.0 --port 3000
+agentsview serve --no-browser  # Disable browser auto-open
 ```
 
 Point to custom session directories with environment variables:

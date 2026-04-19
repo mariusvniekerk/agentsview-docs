@@ -132,8 +132,8 @@ description: Release history for AgentsView
 
 **Improvements**
 
-- Add [project filtering](/pg-sync/#project-filtering) to `pg push` with `-projects`, `-exclude-projects`, and `-all-projects` flags plus config file equivalents. A new [`agentsview projects`](/commands/#agentsview-projects) command lists all projects with session counts.
-- Add an opt-out for the update check via `disable_update_check` in config, `AGENTSVIEW_DISABLE_UPDATE_CHECK=1` environment variable, or `-no-update-check` CLI flag.
+- Add [project filtering](/pg-sync/#project-filtering) to `pg push` with `--projects`, `--exclude-projects`, and `--all-projects` flags plus config file equivalents. A new [`agentsview projects`](/commands/#agentsview-projects) command lists all projects with session counts.
+- Add an opt-out for the update check via `disable_update_check` in config, `AGENTSVIEW_DISABLE_UPDATE_CHECK=1` environment variable, or `--no-update-check` CLI flag.
 
 **Bug fixes**
 
@@ -330,7 +330,7 @@ description: Release history for AgentsView
 **New features**
 
 - Add Pi agent support for importing and viewing Pi conversations, including JSONL session parsing, thinking blocks, and tool calls.
-- Add an `agentsview sync` command to populate the database without starting the HTTP server. Supports a `-full` flag to force a complete resync.
+- Add an `agentsview sync` command to populate the database without starting the HTTP server. Supports a `--full` flag to force a complete resync.
 - Add session renaming (double-click or right-click context menu), soft delete with trash and undo, and pinned messages with a gallery view.
 - Persist starred sessions in SQLite so stars survive server restarts. Existing localStorage stars are automatically migrated on first load.
 

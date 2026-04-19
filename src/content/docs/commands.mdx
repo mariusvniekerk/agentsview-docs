@@ -19,19 +19,19 @@ instead of starting the web UI.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-host` | `127.0.0.1` | Host to bind to |
-| `-port` | `8080` | Port to listen on |
-| `-browser` | `false` | Open browser on startup |
-| `-no-update-check` | `false` | Disable automatic update checks |
-| `-public-url` | | Public URL for hostname or proxy access |
-| `-public-origin` | | Trusted browser origin (repeatable/comma-separated) |
-| `-proxy` | | Managed proxy mode (`caddy`) |
-| `-caddy-bin` | `caddy` | Caddy binary path |
-| `-proxy-bind-host` | `127.0.0.1` | Interface for managed proxy |
-| `-public-port` | `8443` | External port for managed proxy |
-| `-tls-cert` | | TLS certificate path |
-| `-tls-key` | | TLS key path |
-| `-allowed-subnet` | | Client CIDR allowlist (repeatable/comma-separated) |
+| `--host` | `127.0.0.1` | Host to bind to |
+| `--port` | `8080` | Port to listen on |
+| `--no-browser` | `false` | Don't open browser on startup |
+| `--no-update-check` | `false` | Disable automatic update checks |
+| `--public-url` | | Public URL for hostname or proxy access |
+| `--public-origin` | | Trusted browser origin (repeatable/comma-separated) |
+| `--proxy` | | Managed proxy mode (`caddy`) |
+| `--caddy-bin` | `caddy` | Caddy binary path |
+| `--proxy-bind-host` | `127.0.0.1` | Interface for managed proxy |
+| `--public-port` | `8443` | External port for managed proxy |
+| `--tls-cert` | | TLS certificate path |
+| `--tls-key` | | TLS key path |
+| `--allowed-subnet` | | Client CIDR allowlist (repeatable/comma-separated) |
 
 The server auto-discovers an available port if `8080` is busy.
 See [Remote Access](/remote-access/) for details on the remote
@@ -41,9 +41,9 @@ access and proxy flags.
 
 ```bash
 agentsview serve                                # defaults
-agentsview serve -port 9090                     # custom port
-agentsview serve -browser                       # open browser on startup
-agentsview serve -public-url https://agents.example.com
+agentsview serve --port 9090                    # custom port
+agentsview serve --no-browser                   # disable browser auto-open
+agentsview serve --public-url https://agents.example.com
 ```
 
 On startup, the server:
@@ -71,24 +71,24 @@ agentsview sync [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-full` | `false` | Force a full resync regardless of data version |
-| `-host` | | SSH hostname for remote sync |
-| `-user` | | SSH username for remote sync |
-| `-port` | `22` | SSH port for remote sync |
+| `--full` | `false` | Force a full resync regardless of data version |
+| `--host` | | SSH hostname for remote sync |
+| `--user` | | SSH username for remote sync |
+| `--port` | `22` | SSH port for remote sync |
 
 **Examples:**
 
 ```bash
-agentsview sync          # incremental sync and exit
-agentsview sync -full    # full resync and exit
-agentsview sync -host buildbox.local
-agentsview sync -host buildbox.local -user wes -port 2222
+agentsview sync           # incremental sync and exit
+agentsview sync --full    # full resync and exit
+agentsview sync --host buildbox.local
+agentsview sync --host buildbox.local --user wes --port 2222
 ```
 
 After syncing, a summary of session and message counts is printed
 to stdout.
 
-When `-host` is set, AgentsView performs a remote sync over SSH:
+When `--host` is set, AgentsView performs a remote sync over SSH:
 it resolves the supported agent session directories on the remote
 machine, transfers the source session data locally, and indexes it
 into your local archive.
@@ -106,31 +106,31 @@ agentsview prune [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-project` | | Sessions whose project contains this substring |
-| `-max-messages` | `-1` | Sessions with at most N messages |
-| `-before` | | Sessions that ended before this date (`YYYY-MM-DD`) |
-| `-first-message` | | Sessions whose first message starts with this text |
-| `-dry-run` | `false` | Show what would be pruned without deleting |
-| `-yes` | `false` | Skip confirmation prompt |
+| `--project` | | Sessions whose project contains this substring |
+| `--max-messages` | `-1` | Sessions with at most N messages |
+| `--before` | | Sessions that ended before this date (`YYYY-MM-DD`) |
+| `--first-message` | | Sessions whose first message starts with this text |
+| `--dry-run` | `false` | Show what would be pruned without deleting |
+| `--yes` | `false` | Skip confirmation prompt |
 
 **Examples:**
 
 ```bash
 # Preview what would be deleted
-agentsview prune -project "scratch" -dry-run
+agentsview prune --project "scratch" --dry-run
 
 # Delete short sessions from before 2025
-agentsview prune -max-messages 2 -before 2025-01-01
+agentsview prune --max-messages 2 --before 2025-01-01
 
 # Delete sessions starting with a specific message
-agentsview prune -first-message "test" -yes
+agentsview prune --first-message "test" --yes
 
 # Combine filters (AND logic)
-agentsview prune -project "old-project" -max-messages 5 -before 2025-06-01
+agentsview prune --project "old-project" --max-messages 5 --before 2025-06-01
 ```
 
 The prune command displays the number of sessions deleted and
-disk space reclaimed. Use `-dry-run` first to verify the filter
+disk space reclaimed. Use `--dry-run` first to verify the filter
 matches what you expect.
 
 ---
@@ -275,10 +275,10 @@ agentsview pg push [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-full` | `false` | Force full local resync and re-push |
-| `-projects` | | Comma-separated projects to push (inclusive) |
-| `-exclude-projects` | | Comma-separated projects to exclude from push |
-| `-all-projects` | `false` | Ignore configured project filters for this run |
+| `--full` | `false` | Force full local resync and re-push |
+| `--projects` | | Comma-separated projects to push (inclusive) |
+| `--exclude-projects` | | Comma-separated projects to exclude from push |
+| `--all-projects` | `false` | Ignore configured project filters for this run |
 
 See [PostgreSQL Sync — Project Filtering](/pg-sync/#project-filtering)
 for details on how filtering interacts with the push watermark.
@@ -304,7 +304,7 @@ Start a read-only web UI backed by PostgreSQL. See
 agentsview pg serve [flags]
 ```
 
-Accepts the same serve flags (`-host`, `-port`, `-proxy`, etc.)
+Accepts the same serve flags (`--host`, `--port`, `--proxy`, etc.)
 plus PostgreSQL configuration from `config.toml`.
 
 ---
@@ -319,13 +319,13 @@ agentsview projects [flags]
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `-json` | `false` | Output as a JSON array |
+| `--json` | `false` | Output as a JSON array |
 
 **Examples:**
 
 ```bash
-agentsview projects          # tabular output
-agentsview projects -json    # JSON array
+agentsview projects         # tabular output
+agentsview projects --json   # JSON array
 ```
 
 ---
