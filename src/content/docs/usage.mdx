@@ -653,7 +653,37 @@ The same menu also includes **Copy markdown export link**, which
 copies a URL for the session's markdown export endpoint. That link
 can be used in scripts, notes, or shared internal tooling when you
 want a text-oriented representation instead of the standalone HTML
-export.
+export. The markdown export is particularly well-suited for handing
+session context to another agent.
+
+The markdown export route is:
+
+```text
+GET /api/v1/sessions/{id}/md
+```
+
+By default, it exports only the current session. Add the
+`depth` query parameter to inline descendants:
+
+- `?depth=1` — include direct child sessions
+- `?depth=all` — include the full descendant tree
+
+Subagent children are embedded inline near the tool call that
+spawned them. Other child sessions are appended after the parent
+transcript in `<child_session>` blocks. The markdown payload also
+includes XML-style tags for metadata, thinking blocks, tool
+calls, code blocks, and child-session boundaries.
+
+Typical agent handoff flow:
+
+```bash
+curl "http://127.0.0.1:8080/api/v1/sessions/<session-id>/md?depth=all" \
+  -o session-context.md
+```
+
+Then attach `session-context.md` to another agent run or paste
+its contents into a prompt so the next agent can inspect the
+full session tree without opening the AgentsView UI.
 
 ---
 
